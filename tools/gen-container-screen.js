@@ -51,6 +51,16 @@ const CELL = 18; // vanilla's own slot pixel size
 const GAP = 10;  // visible daylight between the three grids
 const START_X = 79, START_Y = 18; // clears equip_panel/horse_renderer to the left
 
+// equip_grid's own height comes from vanilla's grid_dimension_binding, which
+// scales with however many minecraft:equippable slots container_wide.json
+// actually declares - read it directly so bottomHalfY()/rootHeight() don't
+// silently drift out of sync with the entity file and clip the player
+// inventory/hotbar off the bottom of the panel (exactly what happened once
+// the equip test scaled to 30 slots without this file knowing about it).
+const entityPath = path.join(__dirname, "..", "..", "OpenChara", "engine", "bp", "entities", "container_wide.json");
+const entityDoc = JSON.parse(fs.readFileSync(entityPath, "utf8"));
+const EQUIP_SLOTS = entityDoc["minecraft:entity"].component_groups["{{ns}}_container_tamed"]["minecraft:equippable"].slots.length;
+
 // [label, columns, rows, collectionName?] - collectionName defaults to
 // "container_items"; a section can override it to probe whether some other
 // string names a real, separate collection too (e.g. "inventory" - the
@@ -131,7 +141,7 @@ function panelWidth() {
     return SECTIONS.reduce((acc, [, cols]) => acc + cols * CELL + GAP, START_X) - GAP + 7;
 }
 function bottomHalfY() {
-    const maxGridHeight = Math.max(...SECTIONS.map(([, , rows]) => rows * CELL));
+    const maxGridHeight = Math.max(...SECTIONS.map(([, , rows]) => rows * CELL), EQUIP_SLOTS * CELL);
     return START_Y + maxGridHeight + 12;
 }
 function rootHeight() {

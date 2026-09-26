@@ -22,7 +22,7 @@
         "root_panel@common.root_panel": {
           "size": [
             512,
-            340
+            700
           ],
           "layer": 1,
           "controls": [
@@ -30,7 +30,7 @@
               "common_panel@common.common_panel": {
                 "size": [
                   512,
-                  340
+                  700
                 ]
               }
             },
@@ -141,7 +141,7 @@
               "inventory_panel_bottom_half_with_label@common.inventory_panel_bottom_half_with_label": {
                 "offset": [
                   0,
-                  210
+                  570
                 ]
               }
             },
