@@ -18,7 +18,6 @@ const path = require("path");
 const { ContainerBuilder, CELL } = require("../lib/entity-container.js");
 
 const GAP = 10;       // daylight between major sections
-const SHORT_GAP = 4;  // daylight between the two hotbar rows
 const START_X = 79, START_Y = 18; // clears the renderer/equip column to the left
 
 const b = new ContainerBuilder("horse");
@@ -34,23 +33,28 @@ const gridA = b.Inventory("A", 1, 4, { offset: [START_X, START_Y] });
 const gridB = b.Inventory("B", 9, 10, { offset: [START_X + 1 * CELL + GAP, START_Y] });
 const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * CELL + GAP, START_Y] });
 
-// B is the tallest (10 rows = 180px) - C (3 rows = 54px) leaves a large
-// free rectangle under it, same width as C, from y=72 to y=180 (108px
-// tall) - this is where the real codex-open button goes: a proper button
-// (villager/beacon-style texture + label), not an item in a slot.
-const cX = START_X + 1 * CELL + GAP + 9 * CELL + GAP;
-const freeSpaceY = START_Y + 3 * CELL + GAP; // right under C's 3 rows
-const codexButton = b.Button("codex_button", { offset: [cX, freeSpaceY], text: "Codex", width: 9 * CELL, height: 2 * CELL });
+// TOP-LEVEL PANEL LIMIT (see entity-container.js): only ~3 independent
+// top-level container_items sections render at their own position - a 4th
+// visibly collapsed into grid_C's own screen space in real testing. Fix:
+// attach every section past the first 3 (grid_A/B/C) as extra rows on an
+// EXISTING one via attachTo, instead of creating new top-level panels.
+// Real data (collection_index) is unaffected - only where each row lives
+// in the document tree changes.
 
-// Two separate 1-row hotbar-style sections (stack), with a short gap
-// between them, below the tallest main section (B).
-const gridsBottom = START_Y + 10 * CELL;
-const hotbarY = gridsBottom + GAP;
-const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [START_X + 1 * CELL + GAP, hotbarY] });
-const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [START_X + 1 * CELL + GAP, hotbarY + CELL + SHORT_GAP] });
+// codex-open button: attached to C, stacks directly below its 3 rows.
+const codexButton = b.Button("codex_button", { text: "Codex", width: 9 * CELL, height: 2 * CELL, attachTo: "C" });
+
+// Two separate 1-row hotbar-style sections: attached to B, stack directly
+// below its 10 rows.
+const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { attachTo: "B" });
+const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { attachTo: "B" });
 
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
-const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
+// B's own height (10 rows) plus the two hotbar rows now stacked directly
+// beneath it (attachTo) is the tallest column - C's height (3 rows) plus
+// the attached codex button is shorter, so B decides content height.
+const bColumnHeight = 10 * CELL + CELL + CELL; // 10 grid rows + hotbar1 + hotbar2
+const contentBottom = START_Y + bColumnHeight;
 const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
 
 const doc = {
