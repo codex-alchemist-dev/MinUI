@@ -17,42 +17,40 @@ const fs = require("fs");
 const path = require("path");
 const { ContainerBuilder, CELL } = require("../lib/entity-container.js");
 
-const GAP = 6;        // daylight between major sections (was 10 - tightened)
-const SHORT_GAP = 3;  // daylight between the two hotbar rows
-const START_X = 60, START_Y = 18; // clears the renderer/equip column to the left
-const SMALL = 12;     // shrunk cell size for the big grids (vanilla's own is 18) - fits much more on screen
+const GAP = 10;       // daylight between major sections
+const SHORT_GAP = 4;  // daylight between the two hotbar rows
+const START_X = 79, START_Y = 18; // clears the renderer/equip column to the left
 
 const b = new ContainerBuilder("horse");
 
-// Equip column: single-item quick slots, to the left of the renderer.
-// Slots 0/1 (saddle/armor) are reserved automatically by the builder.
-const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [START_X - SMALL - GAP, START_Y], cellSize: SMALL });
+// Equip column: single-item quick slots, to the left of the renderer
+// (original spot: equip at x=7, renderer at x=25).
+const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [7, START_Y] });
 
-// Main bulk storage: two real, independent Inventory sections (genuinely
-// disjoint slot ranges of the same container_items collection). Confirmed
-// hard ceiling is 240 total container_items slots per screen (see
-// entity-container.js) - hotbar1+hotbar2 below already use some of that
-// budget, so B+C are sized to leave room. Placeholder split, easy to
-// re-balance: B_COLS*B_ROWS + C_COLS*C_ROWS + (2 * HOTBAR width) must stay under 240.
-const B_COLS = 9, B_ROWS = 16, C_COLS = 9, C_ROWS = 6;
-const gridB = b.Inventory("B", B_COLS, B_ROWS, { offset: [START_X, START_Y], cellSize: SMALL });
-const gridC = b.Inventory("C", C_COLS, C_ROWS, { offset: [START_X + B_COLS * SMALL + GAP, START_Y], cellSize: SMALL });
+// Back to the original reasonable 3-section design, dev-sized (full
+// vanilla 18px cells): A=1x4, B=9x10, C=9x3. All real, independent
+// Inventory sections now (not mirrored windows like the old attempts).
+const gridA = b.Inventory("A", 1, 4, { offset: [START_X, START_Y] });
+const gridB = b.Inventory("B", 9, 10, { offset: [START_X + 1 * CELL + GAP, START_Y] });
+const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * CELL + GAP, START_Y] });
 
-// Two separate 1-row hotbar-style sections, now Inventory (stacks), with a
-// short gap between them - per request, two separate 1-row sections
-// instead of one 2-row block.
-const gridsBottom = START_Y + Math.max(B_ROWS, C_ROWS) * SMALL;
+// B is the tallest (10 rows = 180px) - C (3 rows = 54px) leaves a large
+// free rectangle under it, same width as C, from y=72 to y=180 (108px
+// tall) - this is where the codex-open test slot goes (see below).
+const cX = START_X + 1 * CELL + GAP + 9 * CELL + GAP;
+const freeSpaceY = START_Y + 3 * CELL + GAP; // right under C's 3 rows
+const codexButton = b.Inventory("codex_button", 1, 1, { offset: [cX, freeSpaceY] });
+
+// Two separate 1-row hotbar-style sections (stack), with a short gap
+// between them, below the tallest main section (B).
+const gridsBottom = START_Y + 10 * CELL;
 const hotbarY = gridsBottom + GAP;
-const HOTBAR_COLS = Math.max(B_COLS, C_COLS);
-const hotbarRow1 = b.Inventory("hotbar1", HOTBAR_COLS, 1, { offset: [START_X, hotbarY], cellSize: SMALL });
-const hotbarRow2 = b.Inventory("hotbar2", HOTBAR_COLS, 1, { offset: [START_X, hotbarY + SMALL + SHORT_GAP], cellSize: SMALL });
+const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [START_X + 1 * CELL + GAP, hotbarY] });
+const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [START_X + 1 * CELL + GAP, hotbarY + CELL + SHORT_GAP] });
 
-const panelW = START_X + B_COLS * SMALL + GAP + C_COLS * SMALL + 7;
-const contentBottom = hotbarY + SMALL + SHORT_GAP + SMALL;
-// Tightened bottom margin: a small gap, then the player inventory panel
-// (fixed 93px, self-anchors to root_panel's bottom edge - see the note
-// below), then just enough room for the hotbar strip poking out below it.
-const rootH = contentBottom + 4 + 93 + 18;
+const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
+const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
+const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
 
 const doc = {
     namespace: "horse",
@@ -102,8 +100,10 @@ const outPath = path.join(__dirname, "..", "rp", "ui", "horse_screen.json");
 fs.writeFileSync(outPath, JSON.stringify(doc, null, 2) + "\n");
 console.log(`Wrote ${outPath}`);
 console.log(`equip_narrow (Equipment, single-item): indices ${narrow.startIndex}-${narrow.endIndex}`);
+console.log(`grid_A (Inventory, stacks): indices ${gridA.startIndex}-${gridA.endIndex}`);
 console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.endIndex}`);
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
+console.log(`codex_button (Inventory, single slot - real button test): index ${codexButton.startIndex}`);
 console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
 console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
