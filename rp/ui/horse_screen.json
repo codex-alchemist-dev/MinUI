@@ -1,19 +1,15 @@
 {
   "namespace": "horse",
-  "npc_test_button@common_buttons.light_glyph_button": {
-    "size": [80, 30],
+  "my_custom_horse_action_button@common_buttons.light_text_button": {
+    "size": [80, 20],
     "offset": [0, 0],
     "anchor_from": "center",
     "anchor_to": "center",
     "layer": 10,
-    "$button_content": "npc_interact.plus_icon",
-    "$pressed_button_name": "button.expand_action_edit",
-    "bindings": [
-      {
-        "binding_type": "collection_details",
-        "binding_collection_name": "actions_collection",
-        "binding_collection_prefix": "actions"
-      }
+    "$button_text": "CODEX",
+    "$pressed_button_name": "cw:ui",
+    "button_mappings": [
+      { "from_button_id": "button.menu_select", "to_button_id": "cw:ui", "mapping_type": "pressed" }
     ]
   },
   "oc_panel": {
@@ -26,7 +22,7 @@
           "layer": 1,
           "controls": [
             { "common_panel@common.common_panel": { "size": [200, 150] } },
-            { "npc_test_button@horse.npc_test_button": {} }
+            { "my_custom_horse_action_button@horse.my_custom_horse_action_button": {} }
           ]
         }
       }
