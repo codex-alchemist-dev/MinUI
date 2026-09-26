@@ -55,14 +55,15 @@ const CELL = 18; // vanilla's own slot pixel size
 const GAP = 10;  // visible daylight between the three grids
 const START_X = 79, START_Y = 18; // clears equip_panel/horse_renderer to the left
 
-// container_items sections (the main bulk-storage grids).
+// container_items sections - now with real, independent starting indices
+// (see buildSection below), confirmed working the same way horse_equip_items
+// did. [label, columns, rows, startIndex]
 const SECTIONS = [
-    ["B", 9, 10],   // 9x10 = 90, container_items
-    ["C", 9, 3],    // 9x3 = 27, container_items
+    ["B", 9, 10, 0],    // 9x10 = 90, indices 0-89
+    ["C", 9, 3, 90],    // 9x3 = 27, indices 90-116
 ];
 
-// horse_equip_items sections - each an independent test of collection_index
-// as a grid offset. [label, columns, rows, startIndex]
+// horse_equip_items sections. [label, columns, rows, startIndex]
 const EQUIP_SECTIONS = [
     ["narrow", 1, 5, 1],   // skips slot 0 (saddle), shows indices 1-5
     ["wide", 9, 2, 6],     // shows indices 6-23
@@ -112,58 +113,70 @@ const doc = {
     },
 };
 
-// Narrow equip column sits where vanilla's equip_panel used to (x=7), next
-// to the horse renderer (x=25-79, 54 wide) - container_items grids start
-// right after both, at START_X.
-function equipGridControls() {
-    const out = [];
-    let y = START_Y;
-    // narrow column, to the left of the renderer
-    const [, ncols, nrows, nstart] = EQUIP_SECTIONS[0];
-    out.push({
-        grid_equip_narrow: {
-            type: "grid",
+// Per the actual JSON UI docs: collection_index is only legal on a DIRECT
+// CHILD of a control that itself declares collection_name (a stack_panel or
+// grid) - every earlier attempt this session set collection_index on the
+// grid/wrapper itself instead, which is the wrong location entirely, and
+// grid_item_template auto-generates every cell identically so it can never
+// carry a distinct per-cell index anyway. Confirmed working in-game: a
+// stack_panel with collection_name on it, and individually-placed children
+// each carrying their own explicit collection_index.
+//
+// buildSection(label, cols, rows, collectionName, template, startIndex, offset)
+// -> a vertical stack_panel of horizontal row stack_panels, each row itself
+// declaring collection_name with `cols` explicit cells, indices continuing
+// across rows starting at startIndex. Used for both container_items and
+// horse_equip_items sections now that the same technique is confirmed to
+// work for both.
+function buildSection(label, cols, rows, collectionName, template, startIndex, offset) {
+    const rowControls = [];
+    for (let r = 0; r < rows; r++) {
+        const cells = [];
+        for (let c = 0; c < cols; c++) {
+            const index = startIndex + r * cols + c;
+            cells.push({
+                [`${label}_cell_${index}@horse.${template}`]: {
+                    size: [CELL, CELL],
+                    collection_index: index,
+                },
+            });
+        }
+        rowControls.push({
+            [`${label}_row_${r}`]: {
+                type: "stack_panel",
+                orientation: "horizontal",
+                size: [cols * CELL, CELL],
+                collection_name: collectionName,
+                controls: cells,
+            },
+        });
+    }
+    return {
+        [`grid_${label}`]: {
+            type: "stack_panel",
+            orientation: "vertical",
             anchor_from: "top_left", anchor_to: "top_left",
-            size: [ncols * CELL, nrows * CELL],
-            offset: [79 - ncols * CELL - GAP, START_Y],
-            grid_dimensions: [ncols, nrows],
-            grid_item_template: "horse.oc_grid_item_equip",
-            collection_name: "horse_equip_items",
-            collection_index: nstart,
+            size: [cols * CELL, rows * CELL],
+            offset,
+            controls: rowControls,
         },
-    });
-    // wide row, full width, below the container_items grids
+    };
+}
+
+function equipGridControls() {
+    const [, ncols, nrows, nstart] = EQUIP_SECTIONS[0];
     const [, wcols, wrows, wstart] = EQUIP_SECTIONS[1];
     const gridsBottom = START_Y + Math.max(...SECTIONS.map(([, , rows]) => rows * CELL));
-    out.push({
-        grid_equip_wide: {
-            type: "grid",
-            anchor_from: "top_left", anchor_to: "top_left",
-            size: [wcols * CELL, wrows * CELL],
-            offset: [START_X, gridsBottom + GAP],
-            grid_dimensions: [wcols, wrows],
-            grid_item_template: "horse.oc_grid_item_equip",
-            collection_name: "horse_equip_items",
-            collection_index: wstart,
-        },
-    });
-    return out;
+    return [
+        buildSection("equip_narrow", ncols, nrows, "horse_equip_items", "oc_grid_item_equip", nstart, [79 - ncols * CELL - GAP, START_Y]),
+        buildSection("equip_wide", wcols, wrows, "horse_equip_items", "oc_grid_item_equip", wstart, [START_X, gridsBottom + GAP]),
+    ];
 }
 function gridControls() {
     let x = START_X;
     const out = [];
-    for (const [label, cols, rows] of SECTIONS) {
-        out.push({
-            [`grid_${label}`]: {
-                type: "grid",
-                anchor_from: "top_left", anchor_to: "top_left",
-                size: [cols * CELL, rows * CELL],
-                offset: [x, START_Y],
-                grid_dimensions: [cols, rows],
-                grid_item_template: "horse.oc_grid_item",
-                collection_name: "container_items",
-            },
-        });
+    for (const [label, cols, rows, startIndex] of SECTIONS) {
+        out.push(buildSection(label, cols, rows, "container_items", "oc_grid_item", startIndex, [x, START_Y]));
         x += cols * CELL + GAP;
     }
     return out;
