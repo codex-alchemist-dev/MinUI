@@ -17,35 +17,39 @@ const fs = require("fs");
 const path = require("path");
 const { ContainerBuilder, CELL } = require("../lib/entity-container.js");
 
-const GAP = 10;      // daylight between major sections
-const SHORT_GAP = 4; // daylight between the two hotbar rows
-const START_X = 79, START_Y = 18; // clears the renderer/equip column to the left
+const GAP = 6;        // daylight between major sections (was 10 - tightened)
+const SHORT_GAP = 3;  // daylight between the two hotbar rows
+const START_X = 60, START_Y = 18; // clears the renderer/equip column to the left
+const SMALL = 12;     // shrunk cell size for the big grids (vanilla's own is 18) - fits much more on screen
 
 const b = new ContainerBuilder("horse");
 
 // Equip column: single-item quick slots, to the left of the renderer.
 // Slots 0/1 (saddle/armor) are reserved automatically by the builder.
-const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [79 - CELL - GAP, START_Y] });
+const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [START_X - SMALL - GAP, START_Y], cellSize: SMALL });
 
 // Main bulk storage: two real, independent Inventory sections (genuinely
 // disjoint slot ranges of the same container_items collection). STRESS
 // TEST: 12x20 = 240 slots each, 480 total - just to see how far this holds.
 const B_COLS = 12, B_ROWS = 20, C_COLS = 12, C_ROWS = 20;
-const gridB = b.Inventory("B", B_COLS, B_ROWS, { offset: [START_X, START_Y] });
-const gridC = b.Inventory("C", C_COLS, C_ROWS, { offset: [START_X + B_COLS * CELL + GAP, START_Y] });
+const gridB = b.Inventory("B", B_COLS, B_ROWS, { offset: [START_X, START_Y], cellSize: SMALL });
+const gridC = b.Inventory("C", C_COLS, C_ROWS, { offset: [START_X + B_COLS * SMALL + GAP, START_Y], cellSize: SMALL });
 
 // Two separate 1-row hotbar-style sections, now Inventory (stacks), with a
 // short gap between them - per request, two separate 1-row sections
 // instead of one 2-row block.
-const gridsBottom = START_Y + Math.max(B_ROWS, C_ROWS) * CELL;
+const gridsBottom = START_Y + Math.max(B_ROWS, C_ROWS) * SMALL;
 const hotbarY = gridsBottom + GAP;
 const HOTBAR_COLS = Math.max(B_COLS, C_COLS);
-const hotbarRow1 = b.Inventory("hotbar1", HOTBAR_COLS, 1, { offset: [START_X, hotbarY] });
-const hotbarRow2 = b.Inventory("hotbar2", HOTBAR_COLS, 1, { offset: [START_X, hotbarY + CELL + SHORT_GAP] });
+const hotbarRow1 = b.Inventory("hotbar1", HOTBAR_COLS, 1, { offset: [START_X, hotbarY], cellSize: SMALL });
+const hotbarRow2 = b.Inventory("hotbar2", HOTBAR_COLS, 1, { offset: [START_X, hotbarY + SMALL + SHORT_GAP], cellSize: SMALL });
 
-const panelW = START_X + B_COLS * CELL + GAP + C_COLS * CELL + 7;
-const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
-const rootH = contentBottom + 12 + 93 + 40; // content + margin + player inv panel (fixed 93px, self-anchors to bottom) + hotbar/margin
+const panelW = START_X + B_COLS * SMALL + GAP + C_COLS * SMALL + 7;
+const contentBottom = hotbarY + SMALL + SHORT_GAP + SMALL;
+// Tightened bottom margin: a small gap, then the player inventory panel
+// (fixed 93px, self-anchors to root_panel's bottom edge - see the note
+// below), then just enough room for the hotbar strip poking out below it.
+const rootH = contentBottom + 4 + 93 + 18;
 
 const doc = {
     namespace: "horse",
