@@ -6,6 +6,45 @@
   "oc_item_container_items@common.container_item": {
     "$item_collection_name": "container_items"
   },
+  "oc_button_bg_codex_button": {
+    "type": "panel",
+    "controls": [
+      {
+        "bg": {
+          "type": "image",
+          "texture": "textures/ui/button_borderless_light",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "lbl": {
+          "type": "label",
+          "text": "Codex",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "text_alignment": "center",
+          "color": [
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "oc_button_item_codex_button@common.container_item": {
+    "$item_collection_name": "container_items",
+    "$background_images": "horse.oc_button_bg_codex_button",
+    "$item_renderer_size": [
+      0,
+      0
+    ]
+  },
   "oc_panel": {
     "type": "panel",
     "controls": [
@@ -1540,38 +1579,30 @@
             {
               "grid_codex_button": {
                 "type": "stack_panel",
-                "orientation": "vertical",
+                "orientation": "horizontal",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
-                  18,
-                  18
+                  162,
+                  36
                 ],
                 "offset": [
                   279,
                   82
                 ],
+                "collection_name": "container_items",
                 "controls": [
                   {
-                    "codex_button_row_0": {
-                      "type": "stack_panel",
-                      "orientation": "horizontal",
+                    "codex_button_cell@horse.oc_button_item_codex_button": {
                       "size": [
-                        18,
-                        18
+                        162,
+                        36
                       ],
-                      "collection_name": "container_items",
-                      "controls": [
-                        {
-                          "codex_button_cell_121@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 121
-                          }
-                        }
-                      ]
+                      "$cell_image_size": [
+                        162,
+                        36
+                      ],
+                      "collection_index": 121
                     }
                   }
                 ]

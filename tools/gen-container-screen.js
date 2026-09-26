@@ -36,10 +36,11 @@ const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * C
 
 // B is the tallest (10 rows = 180px) - C (3 rows = 54px) leaves a large
 // free rectangle under it, same width as C, from y=72 to y=180 (108px
-// tall) - this is where the codex-open test slot goes (see below).
+// tall) - this is where the real codex-open button goes: a proper button
+// (villager/beacon-style texture + label), not an item in a slot.
 const cX = START_X + 1 * CELL + GAP + 9 * CELL + GAP;
 const freeSpaceY = START_Y + 3 * CELL + GAP; // right under C's 3 rows
-const codexButton = b.Inventory("codex_button", 1, 1, { offset: [cX, freeSpaceY] });
+const codexButton = b.Button("codex_button", { offset: [cX, freeSpaceY], text: "Codex", width: 9 * CELL, height: 2 * CELL });
 
 // Two separate 1-row hotbar-style sections (stack), with a short gap
 // between them, below the tallest main section (B).
@@ -103,7 +104,7 @@ console.log(`equip_narrow (Equipment, single-item): indices ${narrow.startIndex}
 console.log(`grid_A (Inventory, stacks): indices ${gridA.startIndex}-${gridA.endIndex}`);
 console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.endIndex}`);
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
-console.log(`codex_button (Inventory, single slot - real button test): index ${codexButton.startIndex}`);
+console.log(`codex_button (real Button, villager/beacon-style): index ${codexButton.index}`);
 console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
 console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
