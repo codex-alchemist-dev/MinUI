@@ -29,9 +29,12 @@ const b = new ContainerBuilder("horse");
 const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [START_X - SMALL - GAP, START_Y], cellSize: SMALL });
 
 // Main bulk storage: two real, independent Inventory sections (genuinely
-// disjoint slot ranges of the same container_items collection). STRESS
-// TEST: 12x20 = 240 slots each, 480 total - just to see how far this holds.
-const B_COLS = 12, B_ROWS = 20, C_COLS = 12, C_ROWS = 20;
+// disjoint slot ranges of the same container_items collection). Confirmed
+// hard ceiling is 240 total container_items slots per screen (see
+// entity-container.js) - hotbar1+hotbar2 below already use some of that
+// budget, so B+C are sized to leave room. Placeholder split, easy to
+// re-balance: B_COLS*B_ROWS + C_COLS*C_ROWS + (2 * HOTBAR width) must stay under 240.
+const B_COLS = 9, B_ROWS = 16, C_COLS = 9, C_ROWS = 6;
 const gridB = b.Inventory("B", B_COLS, B_ROWS, { offset: [START_X, START_Y], cellSize: SMALL });
 const gridC = b.Inventory("C", C_COLS, C_ROWS, { offset: [START_X + B_COLS * SMALL + GAP, START_Y], cellSize: SMALL });
 
