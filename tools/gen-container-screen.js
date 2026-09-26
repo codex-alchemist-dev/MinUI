@@ -33,28 +33,17 @@ const gridA = b.Inventory("A", 1, 4, { offset: [START_X, START_Y] });
 const gridB = b.Inventory("B", 9, 10, { offset: [START_X + 1 * CELL + GAP, START_Y] });
 const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * CELL + GAP, START_Y] });
 
-// TOP-LEVEL PANEL LIMIT (see entity-container.js): only ~3 independent
-// top-level container_items sections render at their own position - a 4th
-// visibly collapsed into grid_C's own screen space in real testing. Fix:
-// attach every section past the first 3 (grid_A/B/C) as extra rows on an
-// EXISTING one via attachTo, instead of creating new top-level panels.
-// Real data (collection_index) is unaffected - only where each row lives
-// in the document tree changes.
-
-// codex-open button: attached to C, stacks directly below its 3 rows.
-const codexButton = b.Button("codex_button", { text: "Codex", width: 9 * CELL, height: 2 * CELL, attachTo: "C" });
-
-// Two separate 1-row hotbar-style sections: attached to B, stack directly
-// below its 10 rows.
-const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { attachTo: "B" });
-const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { attachTo: "B" });
+// DIAGNOSTIC (temporary): the attachTo fix did NOT change the symptom -
+// codex_button still rendered clustered with grid_C regardless of whether
+// it was a separate top-level panel or an attached row, so "top-level
+// panel count" was the wrong theory. Stripped back to a plain 1x1
+// Inventory (no button styling) and dropped the hotbar rows entirely, to
+// remove every possible confound - ui.js will seed every real index with
+// a distinct item so we can map ground truth directly instead of guessing.
+const codexButton = b.Inventory("codex_button", 1, 1, { attachTo: "C" });
 
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
-// B's own height (10 rows) plus the two hotbar rows now stacked directly
-// beneath it (attachTo) is the tallest column - C's height (3 rows) plus
-// the attached codex button is shorter, so B decides content height.
-const bColumnHeight = 10 * CELL + CELL + CELL; // 10 grid rows + hotbar1 + hotbar2
-const contentBottom = START_Y + bColumnHeight;
+const contentBottom = START_Y + 10 * CELL; // grid_B's own height (tallest section)
 const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
 
 const doc = {
@@ -108,9 +97,7 @@ console.log(`equip_narrow (Equipment, single-item): indices ${narrow.startIndex}
 console.log(`grid_A (Inventory, stacks): indices ${gridA.startIndex}-${gridA.endIndex}`);
 console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.endIndex}`);
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
-console.log(`codex_button (real Button, villager/beacon-style): index ${codexButton.index}`);
-console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
-console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
+console.log(`codex_button (plain 1x1, diagnostic): index ${codexButton.startIndex}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
 console.log(`Equippable slots needed: ${b.equippableSlots.length} (write these into container_wide.json's minecraft:equippable.slots)`);
 console.log(`Panel size: ${panelW}x${rootH}`);
