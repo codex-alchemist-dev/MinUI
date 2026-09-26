@@ -28,19 +28,22 @@ const b = new ContainerBuilder("horse");
 const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [79 - CELL - GAP, START_Y] });
 
 // Main bulk storage: two real, independent Inventory sections (genuinely
-// disjoint slot ranges of the same container_items collection).
-const gridB = b.Inventory("B", 9, 10, { offset: [START_X, START_Y] });
-const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 9 * CELL + GAP, START_Y] });
+// disjoint slot ranges of the same container_items collection). STRESS
+// TEST: 12x20 = 240 slots each, 480 total - just to see how far this holds.
+const B_COLS = 12, B_ROWS = 20, C_COLS = 12, C_ROWS = 20;
+const gridB = b.Inventory("B", B_COLS, B_ROWS, { offset: [START_X, START_Y] });
+const gridC = b.Inventory("C", C_COLS, C_ROWS, { offset: [START_X + B_COLS * CELL + GAP, START_Y] });
 
 // Two separate 1-row hotbar-style sections, now Inventory (stacks), with a
 // short gap between them - per request, two separate 1-row sections
 // instead of one 2-row block.
-const gridsBottom = START_Y + 10 * CELL; // grid_B is the tallest of the two main sections
+const gridsBottom = START_Y + Math.max(B_ROWS, C_ROWS) * CELL;
 const hotbarY = gridsBottom + GAP;
-const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [START_X, hotbarY] });
-const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [START_X, hotbarY + CELL + SHORT_GAP] });
+const HOTBAR_COLS = Math.max(B_COLS, C_COLS);
+const hotbarRow1 = b.Inventory("hotbar1", HOTBAR_COLS, 1, { offset: [START_X, hotbarY] });
+const hotbarRow2 = b.Inventory("hotbar2", HOTBAR_COLS, 1, { offset: [START_X, hotbarY + CELL + SHORT_GAP] });
 
-const panelW = START_X + 9 * CELL + GAP + 9 * CELL + 7;
+const panelW = START_X + B_COLS * CELL + GAP + C_COLS * CELL + 7;
 const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
 const rootH = contentBottom + 12 + 93 + 40; // content + margin + player inv panel (fixed 93px, self-anchors to bottom) + hotbar/margin
 
