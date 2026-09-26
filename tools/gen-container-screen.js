@@ -57,6 +57,32 @@ const doc = {
 
     ...b.templateDefs(),
 
+    // ORDERED TEST: does a real JSON UI <button>'s button_mappings actually
+    // relay to a server-side scriptevent when to_button_id is a made-up
+    // name, as claimed? Minimal state visuals so it actually renders (a
+    // bare common.button has no default/hover/pressed panels of its own).
+    "test_button_state@common.dialog_background_opaque": {},
+    test_button_default: {
+        type: "panel",
+        controls: [
+            { "bg@horse.test_button_state": {} },
+            { lbl: { type: "label", text: "TEST", size: ["100%", "100%"], text_alignment: "center", color: [1, 1, 1] } },
+        ],
+    },
+    "my_custom_horse_action_button@common.button": {
+        size: [40, 18],
+        offset: [5, -5],
+        anchor_from: "bottom_left",
+        anchor_to: "bottom_left",
+        layer: 10,
+        default_control: "horse.test_button_default",
+        hover_control: "horse.test_button_default",
+        pressed_control: "horse.test_button_default",
+        button_mappings: [
+            { from_button_id: "button.menu_select", to_button_id: "button.my_custom_script_event", mapping_type: "pressed" },
+        ],
+    },
+
     oc_panel: {
         type: "panel",
         controls: [
@@ -80,6 +106,7 @@ const doc = {
                         { "hotbar_grid_template@common.hotbar_grid_template": {} },
                         { "inventory_selected_icon_button@common.inventory_selected_icon_button": {} },
                         { "gamepad_cursor@common.gamepad_cursor_button": {} },
+                        { "my_custom_horse_action_button@horse.my_custom_horse_action_button": {} },
                     ],
                 },
             },
