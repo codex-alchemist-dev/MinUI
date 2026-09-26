@@ -3,8 +3,8 @@
   "oc_grid_item@common.container_item": {
     "$item_collection_name": "container_items"
   },
-  "oc_grid_item_inv@common.container_item": {
-    "$item_collection_name": "inventory"
+  "oc_grid_item_equip@common.container_item": {
+    "$item_collection_name": "horse_equip_items"
   },
   "oc_panel": {
     "type": "panel",
@@ -21,16 +21,16 @@
       {
         "root_panel@common.root_panel": {
           "size": [
-            512,
-            700
+            420,
+            386
           ],
           "layer": 1,
           "controls": [
             {
               "common_panel@common.common_panel": {
                 "size": [
-                  512,
-                  700
+                  420,
+                  386
                 ]
               }
             },
@@ -38,7 +38,7 @@
               "horse_section_label@horse.horse_label": {}
             },
             {
-              "equipment@horse.equip_panel": {
+              "renderer@horse.horse_renderer": {
                 "offset": [
                   7,
                   18
@@ -46,32 +46,47 @@
               }
             },
             {
-              "renderer@horse.horse_renderer": {
-                "offset": [
-                  25,
-                  18
-                ]
-              }
-            },
-            {
-              "grid_A": {
+              "grid_equip_narrow": {
                 "type": "grid",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "size": [
                   18,
-                  72
+                  90
                 ],
                 "offset": [
-                  79,
+                  51,
                   18
                 ],
                 "grid_dimensions": [
                   1,
-                  4
+                  5
                 ],
-                "grid_item_template": "horse.oc_grid_item",
-                "collection_name": "container_items"
+                "grid_item_template": "horse.oc_grid_item_equip",
+                "collection_name": "horse_equip_items",
+                "collection_index": 1
+              }
+            },
+            {
+              "grid_equip_wide": {
+                "type": "grid",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  162,
+                  36
+                ],
+                "offset": [
+                  79,
+                  208
+                ],
+                "grid_dimensions": [
+                  9,
+                  2
+                ],
+                "grid_item_template": "horse.oc_grid_item_equip",
+                "collection_name": "horse_equip_items",
+                "collection_index": 6
               }
             },
             {
@@ -84,7 +99,7 @@
                   180
                 ],
                 "offset": [
-                  107,
+                  79,
                   18
                 ],
                 "grid_dimensions": [
@@ -105,7 +120,7 @@
                   54
                 ],
                 "offset": [
-                  279,
+                  251,
                   18
                 ],
                 "grid_dimensions": [
@@ -117,31 +132,10 @@
               }
             },
             {
-              "grid_D": {
-                "type": "grid",
-                "anchor_from": "top_left",
-                "anchor_to": "top_left",
-                "size": [
-                  54,
-                  54
-                ],
-                "offset": [
-                  451,
-                  18
-                ],
-                "grid_dimensions": [
-                  3,
-                  3
-                ],
-                "grid_item_template": "horse.oc_grid_item_inv",
-                "collection_name": "inventory"
-              }
-            },
-            {
               "inventory_panel_bottom_half_with_label@common.inventory_panel_bottom_half_with_label": {
                 "offset": [
                   0,
-                  570
+                  256
                 ]
               }
             },

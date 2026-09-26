@@ -4,45 +4,49 @@
 // hand (`node tools/gen-container-screen.js`) whenever the layout needs
 // regenerating, and the OUTPUT file is what actually ships.
 //
-// EIGHTH ATTEMPT. Findings so far, kept for the record:
+// Findings so far, kept for the record:
 //   1. Hand-placed standalone common.container_item cells crashed on
 //      select - fixed by adding "$item_collection_name": "container_items"
 //      (required by the game's Bundle-interaction system).
-//   2. With that fixed, every hand-placed cell read/wrote the SAME
-//      underlying slot regardless of its own collection_index, on the cell
-//      itself or on a wrapping panel - collection_index appears to only
-//      patch a cell that already exists inside a real, engine-generated
-//      grid, not freely sample an arbitrary index into a standalone
-//      control.
+//   2. collection_index does NOT offset a grid bound to "container_items" -
+//      every grid sharing that collection always starts at index 0 and
+//      mirrors, confirmed four separate ways. No property offsets a
+//      container_items grid's starting index.
 //   3. A single real native type:"grid" at 90 slots worked correctly for
 //      exactly its first 30 slots - container_type "horse" has a real,
 //      undocumented client-side interaction ceiling there, matching AC's
 //      own real production inventory_size (30) exactly.
-//   4. Furnace's real ingredient/fuel/output slots use no collection_index
-//      at all - each gets its own uniquely named collection, which only
-//      works because the engine natively exposes those specific names for
-//      a furnace. Confirmed this doesn't generalize: three real grids each
-//      given a MADE-UP collection_name crashed identically to finding 1 -
-//      an unrecognized name doesn't render empty, it crashes.
+//   4. Furnace/brewing/anvil/etc's real per-slot collections
+//      (furnace_ingredient_items, etc.) are each their own uniquely-named,
+//      single-slot collection tied to real crafting logic - doesn't
+//      generalize to arbitrary made-up names (those crash on select).
+//   5. minecraft:equippable's "horse_equip_items" collection is different
+//      from all of the above: indices 2+ are genuinely independent,
+//      single-item slots (confirmed via simultaneous distinct items sitting
+//      in different indices without mirroring) - the first real, non-fake,
+//      non-mirrored multi-slot mechanism found all session. Indices 0/1
+//      are natively special-cased (validate only against the literal
+//      "item" field, ignore accepted_items; index 1 additionally refuses
+//      to accept from a held stack, single non-stacked items only).
+//      Stacking beyond 1 item per slot is not possible in this collection
+//      at all (confirmed: neither accepted_items nor an item's own
+//      max_stack_size/format_version unlocks it).
 //
-// THIS ATTEMPT: three real, native type:"grid" elements again, but this
-// time all three on the one real collection ("container_items") instead
-// of inventing new names - prompted by noticing the single real-collection
-// grid in the previous experiment (section A) rendered and behaved
-// correctly on its own. Each grid still independently numbers its own
-// cells from index 0 of that shared collection (confirmed earlier, no
-// property offsets a grid's starting index), so this does NOT create
-// three disjoint storage regions - it's three different-shaped WINDOWS
-// onto the same underlying items, all overlapping on whichever indices
-// each grid's own size covers. Worth seeing exactly what that looks and
-// behaves like in practice rather than assuming it's undesirable.
+// THIS ATTEMPT: testing whether "horse_equip_items" - unlike
+// "container_items" - actually DOES respect collection_index as a grid
+// offset. Vanilla's own stock equip_panel (equip_grid + saddle/armor ghost
+// icons) is dropped entirely in favor of two custom grids we fully control:
+//   - equip_narrow: 1x5, collection_index 1 (skips slot 0/saddle)
+//   - equip_wide: 9x2 (18 slots), collection_index 6
+// If collection_index works here, these are two disjoint, real, independent
+// slot ranges. If it doesn't (same as container_items), both will just
+// mirror index 0 onward - worth finding out either way.
 //
-// Two other hard constraints from earlier attempts still apply: container_type
+// Two hard constraints from earlier attempts still apply: container_type
 // is a fixed 7-value enum with no "use my own screen" option, and
 // per-instance content swapping is confirmed impossible - so this still
 // replaces horse_screen.json unconditionally, for every container_type
-// "horse" entity including real horses/donkeys/mules/llamas. equip_panel
-// and horse_renderer are kept at their real original offsets.
+// "horse" entity including real horses/donkeys/mules/llamas.
 "use strict";
 const fs = require("fs");
 const path = require("path");
@@ -51,26 +55,17 @@ const CELL = 18; // vanilla's own slot pixel size
 const GAP = 10;  // visible daylight between the three grids
 const START_X = 79, START_Y = 18; // clears equip_panel/horse_renderer to the left
 
-// equip_grid's own height comes from vanilla's grid_dimension_binding, which
-// scales with however many minecraft:equippable slots container_wide.json
-// actually declares - read it directly so bottomHalfY()/rootHeight() don't
-// silently drift out of sync with the entity file and clip the player
-// inventory/hotbar off the bottom of the panel (exactly what happened once
-// the equip test scaled to 30 slots without this file knowing about it).
-const entityPath = path.join(__dirname, "..", "..", "OpenChara", "engine", "bp", "entities", "container_wide.json");
-const entityDoc = JSON.parse(fs.readFileSync(entityPath, "utf8"));
-const EQUIP_SLOTS = entityDoc["minecraft:entity"].component_groups["{{ns}}_container_tamed"]["minecraft:equippable"].slots.length;
-
-// [label, columns, rows, collectionName?] - collectionName defaults to
-// "container_items"; a section can override it to probe whether some other
-// string names a real, separate collection too (e.g. "inventory" - the
-// literal container_type enum value, on the chance it's coincidentally
-// also a real collection name, the way "horse_equip_items" is).
+// container_items sections (the main bulk-storage grids).
 const SECTIONS = [
-    ["A", 1, 4],                        // 1x4 = 4, container_items
-    ["B", 9, 10],                       // 9x10 = 90, container_items
-    ["C", 9, 3],                        // 9x3 = 27, container_items
-    ["D", 3, 3, "inventory"],           // 3x3 = 9, TEST: collection_name "inventory"
+    ["B", 9, 10],   // 9x10 = 90, container_items
+    ["C", 9, 3],    // 9x3 = 27, container_items
+];
+
+// horse_equip_items sections - each an independent test of collection_index
+// as a grid offset. [label, columns, rows, startIndex]
+const EQUIP_SECTIONS = [
+    ["narrow", 1, 5, 1],   // skips slot 0 (saddle), shows indices 1-5
+    ["wide", 9, 2, 6],     // shows indices 6-23
 ];
 
 const doc = {
@@ -78,9 +73,8 @@ const doc = {
 
     // Shared item template for the container_items sections.
     "oc_grid_item@common.container_item": { "$item_collection_name": "container_items" },
-    // Separate template for the "inventory" collection test - $item_collection_name
-    // must match whatever collection_name the grid actually uses.
-    "oc_grid_item_inv@common.container_item": { "$item_collection_name": "inventory" },
+    // Separate template for horse_equip_items sections.
+    "oc_grid_item_equip@common.container_item": { "$item_collection_name": "horse_equip_items" },
 
     oc_panel: {
         type: "panel",
@@ -95,8 +89,8 @@ const doc = {
                     controls: [
                         { "common_panel@common.common_panel": { size: [panelWidth(), rootHeight()] } },
                         { "horse_section_label@horse.horse_label": {} },
-                        { "equipment@horse.equip_panel": { offset: [7, 18] } },
-                        { "renderer@horse.horse_renderer": { offset: [25, 18] } },
+                        { "renderer@horse.horse_renderer": { offset: [7, 18] } },
+                        ...equipGridControls(),
                         ...gridControls(),
                         { "inventory_panel_bottom_half_with_label@common.inventory_panel_bottom_half_with_label": { offset: [0, bottomHalfY()] } },
                         { "hotbar_grid_template@common.hotbar_grid_template": {} },
@@ -118,10 +112,47 @@ const doc = {
     },
 };
 
+// Narrow equip column sits where vanilla's equip_panel used to (x=7), next
+// to the horse renderer (x=25-79, 54 wide) - container_items grids start
+// right after both, at START_X.
+function equipGridControls() {
+    const out = [];
+    let y = START_Y;
+    // narrow column, to the left of the renderer
+    const [, ncols, nrows, nstart] = EQUIP_SECTIONS[0];
+    out.push({
+        grid_equip_narrow: {
+            type: "grid",
+            anchor_from: "top_left", anchor_to: "top_left",
+            size: [ncols * CELL, nrows * CELL],
+            offset: [79 - ncols * CELL - GAP, START_Y],
+            grid_dimensions: [ncols, nrows],
+            grid_item_template: "horse.oc_grid_item_equip",
+            collection_name: "horse_equip_items",
+            collection_index: nstart,
+        },
+    });
+    // wide row, full width, below the container_items grids
+    const [, wcols, wrows, wstart] = EQUIP_SECTIONS[1];
+    const gridsBottom = START_Y + Math.max(...SECTIONS.map(([, , rows]) => rows * CELL));
+    out.push({
+        grid_equip_wide: {
+            type: "grid",
+            anchor_from: "top_left", anchor_to: "top_left",
+            size: [wcols * CELL, wrows * CELL],
+            offset: [START_X, gridsBottom + GAP],
+            grid_dimensions: [wcols, wrows],
+            grid_item_template: "horse.oc_grid_item_equip",
+            collection_name: "horse_equip_items",
+            collection_index: wstart,
+        },
+    });
+    return out;
+}
 function gridControls() {
     let x = START_X;
     const out = [];
-    for (const [label, cols, rows, collectionName = "container_items"] of SECTIONS) {
+    for (const [label, cols, rows] of SECTIONS) {
         out.push({
             [`grid_${label}`]: {
                 type: "grid",
@@ -129,8 +160,8 @@ function gridControls() {
                 size: [cols * CELL, rows * CELL],
                 offset: [x, START_Y],
                 grid_dimensions: [cols, rows],
-                grid_item_template: collectionName === "container_items" ? "horse.oc_grid_item" : "horse.oc_grid_item_inv",
-                collection_name: collectionName,
+                grid_item_template: "horse.oc_grid_item",
+                collection_name: "container_items",
             },
         });
         x += cols * CELL + GAP;
@@ -141,8 +172,9 @@ function panelWidth() {
     return SECTIONS.reduce((acc, [, cols]) => acc + cols * CELL + GAP, START_X) - GAP + 7;
 }
 function bottomHalfY() {
-    const maxGridHeight = Math.max(...SECTIONS.map(([, , rows]) => rows * CELL), EQUIP_SLOTS * CELL);
-    return START_Y + maxGridHeight + 12;
+    const gridsHeight = Math.max(...SECTIONS.map(([, , rows]) => rows * CELL));
+    const [, , wrows] = EQUIP_SECTIONS[1];
+    return START_Y + gridsHeight + GAP + wrows * CELL + 12;
 }
 function rootHeight() {
     return bottomHalfY() + 90 + 40; // grids + player inv block + hotbar/margin
@@ -151,5 +183,6 @@ function rootHeight() {
 const outPath = path.join(__dirname, "..", "rp", "ui", "horse_screen.json");
 fs.writeFileSync(outPath, JSON.stringify(doc, null, 2) + "\n");
 console.log(`Wrote ${outPath}`);
-console.log(`Sections (all on "container_items"): ${SECTIONS.map(([l, c, r]) => `${l}=${c}x${r}=${c * r}`).join(", ")}`);
+console.log(`container_items sections: ${SECTIONS.map(([l, c, r]) => `${l}=${c}x${r}=${c * r}`).join(", ")}`);
+console.log(`horse_equip_items sections: ${EQUIP_SECTIONS.map(([l, c, r, s]) => `${l}=${c}x${r}=${c * r} (indices ${s}-${s + c * r - 1})`).join(", ")}`);
 console.log(`Panel size: ${panelWidth()}x${rootHeight()}`);
