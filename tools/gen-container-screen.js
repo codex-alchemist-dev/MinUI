@@ -51,20 +51,26 @@ const CELL = 18; // vanilla's own slot pixel size
 const GAP = 10;  // visible daylight between the three grids
 const START_X = 79, START_Y = 18; // clears equip_panel/horse_renderer to the left
 
-// [label, columns, rows] - all three read/write the SAME "container_items"
-// collection, each independently starting at its own index 0.
+// [label, columns, rows, collectionName?] - collectionName defaults to
+// "container_items"; a section can override it to probe whether some other
+// string names a real, separate collection too (e.g. "inventory" - the
+// literal container_type enum value, on the chance it's coincidentally
+// also a real collection name, the way "horse_equip_items" is).
 const SECTIONS = [
-    ["A", 1, 4],    // 1x4 = 4
-    ["B", 9, 10],   // 9x10 = 90
-    ["C", 9, 3],    // 9x3 = 27
+    ["A", 1, 4],                        // 1x4 = 4, container_items
+    ["B", 9, 10],                       // 9x10 = 90, container_items
+    ["C", 9, 3],                        // 9x3 = 27, container_items
+    ["D", 3, 3, "inventory"],           // 3x3 = 9, TEST: collection_name "inventory"
 ];
 
 const doc = {
     namespace: "horse",
 
-    // One shared item template - every grid below uses the same real
-    // collection, so they can all use the same template.
+    // Shared item template for the container_items sections.
     "oc_grid_item@common.container_item": { "$item_collection_name": "container_items" },
+    // Separate template for the "inventory" collection test - $item_collection_name
+    // must match whatever collection_name the grid actually uses.
+    "oc_grid_item_inv@common.container_item": { "$item_collection_name": "inventory" },
 
     oc_panel: {
         type: "panel",
@@ -105,7 +111,7 @@ const doc = {
 function gridControls() {
     let x = START_X;
     const out = [];
-    for (const [label, cols, rows] of SECTIONS) {
+    for (const [label, cols, rows, collectionName = "container_items"] of SECTIONS) {
         out.push({
             [`grid_${label}`]: {
                 type: "grid",
@@ -113,8 +119,8 @@ function gridControls() {
                 size: [cols * CELL, rows * CELL],
                 offset: [x, START_Y],
                 grid_dimensions: [cols, rows],
-                grid_item_template: "horse.oc_grid_item",
-                collection_name: "container_items",
+                grid_item_template: collectionName === "container_items" ? "horse.oc_grid_item" : "horse.oc_grid_item_inv",
+                collection_name: collectionName,
             },
         });
         x += cols * CELL + GAP;
