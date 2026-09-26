@@ -1,29 +1,37 @@
 {
   "namespace": "horse",
-  "horse_panel": {
-    "modifications": [
+  "my_custom_horse_action_button@common_buttons.light_text_button": {
+    "size": [80, 20],
+    "offset": [0, 0],
+    "anchor_from": "center",
+    "anchor_to": "center",
+    "layer": 10,
+    "$button_text": "TEST",
+    "button_mappings": [
+      { "from_button_id": "button.menu_select", "to_button_id": "button.my_custom_script_event", "mapping_type": "pressed" }
+    ]
+  },
+  "oc_panel": {
+    "type": "panel",
+    "controls": [
+      { "container_gamepad_helpers@common.container_gamepad_helpers": {} },
       {
-        "array_name": "controls",
-        "operation": "insert_back",
-        "value": [
-          {
-            "my_custom_horse_action_button@common.button": {
-              "size": [ 40, 18 ],
-              "offset": [ 5, -5 ],
-              "anchor_from": "bottom_left",
-              "anchor_to": "bottom_left",
-              "layer": 10,
-              "button_mappings": [
-                {
-                  "from_button_id": "button.menu_select",
-                  "to_button_id": "button.my_custom_script_event",
-                  "mapping_type": "pressed"
-                }
-              ]
-            }
-          }
-        ]
+        "root_panel@common.root_panel": {
+          "size": [200, 150],
+          "layer": 1,
+          "controls": [
+            { "common_panel@common.common_panel": { "size": [200, 150] } },
+            { "my_custom_horse_action_button@horse.my_custom_horse_action_button": {} }
+          ]
+        }
       }
+    ]
+  },
+  "horse_screen@common.inventory_screen_common": {
+    "$close_on_player_hurt|default": false,
+    "close_on_player_hurt": "$close_on_player_hurt",
+    "variables": [
+      { "requires": "true", "$screen_content": "horse.oc_panel" }
     ]
   }
 }
