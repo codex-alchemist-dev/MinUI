@@ -18,6 +18,7 @@ const path = require("path");
 const { ContainerBuilder, CELL } = require("../lib/entity-container.js");
 
 const GAP = 10;       // daylight between major sections
+const SHORT_GAP = 4;  // daylight between the two hotbar rows
 const START_X = 79, START_Y = 18; // clears the renderer/equip column to the left
 
 const b = new ContainerBuilder("horse");
@@ -30,20 +31,25 @@ const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [7, START_Y] });
 // vanilla 18px cells): A=1x4, B=9x10, C=9x3. All real, independent
 // Inventory sections now (not mirrored windows like the old attempts).
 const gridA = b.Inventory("A", 1, 4, { offset: [START_X, START_Y] });
-const gridB = b.Inventory("B", 9, 10, { offset: [START_X + 1 * CELL + GAP, START_Y] });
-const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * CELL + GAP, START_Y] });
+const bX = START_X + 1 * CELL + GAP;
+const gridB = b.Inventory("B", 9, 10, { offset: [bX, START_Y] });
+const gridC = b.Inventory("C", 9, 3, { offset: [bX + 9 * CELL + GAP, START_Y] });
 
-// DIAGNOSTIC (temporary): the attachTo fix did NOT change the symptom -
-// codex_button still rendered clustered with grid_C regardless of whether
-// it was a separate top-level panel or an attached row, so "top-level
-// panel count" was the wrong theory. Stripped back to a plain 1x1
-// Inventory (no button styling) and dropped the hotbar rows entirely, to
-// remove every possible confound - ui.js will seed every real index with
-// a distinct item so we can map ground truth directly instead of guessing.
-const codexButton = b.Inventory("codex_button", 1, 1, { attachTo: "C" });
+// Two separate 1-row hotbar-style sections below grid_B, each its own
+// independent top-level Inventory() with an explicit offset - this is the
+// ORIGINAL, first-ever hotbar design (predates attachTo entirely, see
+// MinUI commit 8b1b64e) and uses the exact same mechanism already proven
+// correct for grid_A/B/C. The later attachTo-based hotbar (appending rows
+// into an existing section after the fact) never rendered correctly
+// across two separate attempts - dropped in favor of going back to what
+// was actually confirmed working. No codex button - it never had a
+// working press-detection channel either (see entity-container.js).
+const hotbarY = START_Y + 10 * CELL + GAP; // below grid_B, its tallest section
+const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [bX, hotbarY] });
+const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [bX, hotbarY + CELL + SHORT_GAP] });
 
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
-const contentBottom = START_Y + 10 * CELL; // grid_B's own height (tallest section)
+const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
 const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
 
 const doc = {
@@ -97,7 +103,8 @@ console.log(`equip_narrow (Equipment, single-item): indices ${narrow.startIndex}
 console.log(`grid_A (Inventory, stacks): indices ${gridA.startIndex}-${gridA.endIndex}`);
 console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.endIndex}`);
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
-console.log(`codex_button (plain 1x1, diagnostic): index ${codexButton.startIndex}`);
+console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
+console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
 console.log(`Equippable slots needed: ${b.equippableSlots.length} (write these into container_wide.json's minecraft:equippable.slots)`);
 console.log(`Panel size: ${panelW}x${rootH}`);

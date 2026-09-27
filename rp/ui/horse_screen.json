@@ -22,7 +22,7 @@
         "root_panel@common.root_panel": {
           "size": [
             448,
-            319
+            369
           ],
           "layer": 1,
           "controls": [
@@ -30,7 +30,7 @@
               "common_panel@common.common_panel": {
                 "size": [
                   448,
-                  319
+                  369
                 ]
               }
             },
@@ -1533,24 +1533,226 @@
                         }
                       ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "grid_hotbar1": {
+                "type": "stack_panel",
+                "orientation": "vertical",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  162,
+                  18
+                ],
+                "offset": [
+                  107,
+                  208
+                ],
+                "controls": [
                   {
-                    "codex_button_row_0": {
+                    "hotbar1_row_0": {
                       "type": "stack_panel",
                       "orientation": "horizontal",
                       "size": [
-                        18,
+                        162,
                         18
                       ],
                       "collection_name": "container_items",
                       "controls": [
                         {
-                          "codex_button_cell_128@horse.oc_item_container_items": {
+                          "hotbar1_cell_128@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
                             ],
                             "collection_index": 128
+                          }
+                        },
+                        {
+                          "hotbar1_cell_129@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 129
+                          }
+                        },
+                        {
+                          "hotbar1_cell_130@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 130
+                          }
+                        },
+                        {
+                          "hotbar1_cell_131@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 131
+                          }
+                        },
+                        {
+                          "hotbar1_cell_132@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 132
+                          }
+                        },
+                        {
+                          "hotbar1_cell_133@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 133
+                          }
+                        },
+                        {
+                          "hotbar1_cell_134@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 134
+                          }
+                        },
+                        {
+                          "hotbar1_cell_135@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 135
+                          }
+                        },
+                        {
+                          "hotbar1_cell_136@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 136
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "grid_hotbar2": {
+                "type": "stack_panel",
+                "orientation": "vertical",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  162,
+                  18
+                ],
+                "offset": [
+                  107,
+                  230
+                ],
+                "controls": [
+                  {
+                    "hotbar2_row_0": {
+                      "type": "stack_panel",
+                      "orientation": "horizontal",
+                      "size": [
+                        162,
+                        18
+                      ],
+                      "collection_name": "container_items",
+                      "controls": [
+                        {
+                          "hotbar2_cell_137@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 137
+                          }
+                        },
+                        {
+                          "hotbar2_cell_138@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 138
+                          }
+                        },
+                        {
+                          "hotbar2_cell_139@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 139
+                          }
+                        },
+                        {
+                          "hotbar2_cell_140@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 140
+                          }
+                        },
+                        {
+                          "hotbar2_cell_141@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 141
+                          }
+                        },
+                        {
+                          "hotbar2_cell_142@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 142
+                          }
+                        },
+                        {
+                          "hotbar2_cell_143@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 143
+                          }
+                        },
+                        {
+                          "hotbar2_cell_144@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 144
+                          }
+                        },
+                        {
+                          "hotbar2_cell_145@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 145
                           }
                         }
                       ]
