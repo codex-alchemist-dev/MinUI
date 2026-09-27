@@ -7,6 +7,9 @@ pulled out into its own repo because it's a genuinely separate concern -
 OpenChara is a character/squad/tactical-AI framework; MinUI is just the UI
 layer any Bedrock add-on could use.
 
+A [Codex Alchemist](https://github.com/codex-alchemist-dev) project, under
+Fireball Everything. See [AUTHORS.md](AUTHORS.md).
+
 **Status: early, single-consumer.** OpenChara is the only project wired up to
 it today, and some of MinUI's code still assumes OpenChara's conventions
 (namespace/tag naming resolved at build time, not yet a configurable option
