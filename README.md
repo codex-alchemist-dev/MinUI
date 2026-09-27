@@ -32,6 +32,9 @@ lib/
   lintjsonui.js  catches known "silent failure" JSON UI mistakes at build time
   entity-container.js  Inventory()/Equipment()/Button() container-screen
                  primitives + validateContainerContract() (OR-Track D5)
+  layout/grid.js chunkRows() - the cols x rows grid-chunking math shared by
+                 compile.js's <grid> and entity-container.js's Inventory()/
+                 Equipment() (OR-Track D3)
   png.js         a pure-Node PNG reader/writer (zlib only, no native deps)
   portraits.js   auto-crops a character portrait from its geometry + skin
   test/          entity-container.js's own test suite
@@ -175,6 +178,18 @@ This sidesteps the whole click-capture question entirely, since it's driven
 by Bedrock's normal item-use/block-interact events, not by any on-screen
 control - real interactivity with zero dialog transition, at the cost of
 being keyboard/hotbar-driven rather than point-and-click.
+
+## Layout
+
+`row`/`column` compile to native Bedrock `stack_panel` (`orientation:
+horizontal`/`vertical`), so one-axis flow layout is handled by the engine
+itself, not by custom math here - `withGap()` inserts spacer panels between
+children since `stack_panel` has no native gap property. `<grid>` chunks its
+children into rows of `columns="N"` and stacks those rows the same way.
+`entity-container.js`'s `Inventory()`/`Equipment()` use the identical
+cols x rows chunking (`lib/layout/grid.js`'s `chunkRows()`) to lay out fixed
+`cellSize` slots at absolute offsets, since real interactive item slots
+need known positions rather than flowing layout.
 
 ## Chest-contract validation (OR-Track D5)
 
