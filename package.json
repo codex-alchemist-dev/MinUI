@@ -4,5 +4,14 @@
   "description": "Custom in-game UI framework for Minecraft Bedrock add-ons: a screen language, compiler and runtime built on real, in-game-verified Bedrock mechanisms. Consumed by OpenChara (and any other project) as a sibling repo, not an npm package yet.",
   "private": true,
   "license": "MIT",
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node types/test/run.js"
+  },
+  "devDependencies": {
+    "@minecraft/server": "^2.6.0",
+    "typescript": "^5.9.3"
+  }
 }

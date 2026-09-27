@@ -34,10 +34,19 @@ lib/
   portraits.js   auto-crops a character portrait from its geometry + skin
 runtime/
   runtime.js     the form transport + expression evaluator + navigation stack
+  runtime.d.ts   hand-written types for runtime.js (OR-Track D2)
   hud.js         the persistent-HUD relay (title-channel data push)
+  hud.d.ts       hand-written types for hud.js
   container.js   chest-style container screens (a satchel entity)
+  container.d.ts hand-written types for container.js
   controlItems.js reusable "locked hotbar loadout, routed to handlers" helper
+  controlItems.d.ts hand-written types for controlItems.js
   i18n.js        per-player language override on top of RawMessage/{t:key}
+  i18n.d.ts      hand-written types for i18n.js
+types/
+  test/          type-check tests for the .d.ts files above (real tsc, see
+                 "TypeScript authoring" below)
+  tsconfig.example.json  a starting point for a mod project's own tsconfig
 rp/ui/
   server_form.json       hooks vanilla's own form factory to draw compiled screens
   hud_screen.json        hooks vanilla's HUD to host compiled <hud> elements
@@ -160,6 +169,33 @@ This sidesteps the whole click-capture question entirely, since it's driven
 by Bedrock's normal item-use/block-interact events, not by any on-screen
 control - real interactivity with zero dialog transition, at the cost of
 being keyboard/hotbar-driven rather than point-and-click.
+
+## TypeScript authoring (OR-Track D2)
+
+**Authoring-layer-only** - a real, confirmed scope decision, not a partial
+implementation: a mod's own content scripts can be written in TypeScript
+against MinUI's real runtime API for full type-checking/autocomplete;
+MinUI's own compiler and runtime (`lib/`, `runtime/*.js`) stay plain,
+dependency-free JS forever. Nothing about MinUI's own build changes.
+
+- Each `runtime/*.js` file has a hand-written `runtime/*.d.ts` sitting
+  right next to it - TypeScript's own module resolution finds it
+  automatically for a relative `import ... from ".../runtime.js"`, no
+  bundler and no MinUI build step required.
+- `typescript` and `@minecraft/server` are **devDependencies only** (for
+  testing these `.d.ts` files against the real compiler) - MinUI's actual
+  runtime still has zero dependencies, per its own long-standing rule (see
+  `CONTRIBUTING.md`). A mod project that wants to author in TypeScript
+  adds its own `typescript` devDependency and compiles with a real `tsc`
+  step before OpenRock's build picks up the resulting plain `.js` as an
+  ordinary content script - see `types/tsconfig.example.json` for a
+  starting point.
+- `npm test` (`types/test/run.js`) runs the real TypeScript compiler
+  against two fixtures: `valid-sample.ts` (realistic usage of every typed
+  export across every runtime module - must type-check with zero errors)
+  and `invalid-sample.ts` (five deliberately wrong calls, one per real
+  mistake a mod author could make - must produce exactly five errors,
+  proving the types actually catch mistakes rather than accepting `any`).
 
 ## Credit
 

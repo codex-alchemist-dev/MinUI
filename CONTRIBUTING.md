@@ -9,7 +9,10 @@ assuming something is a finished, general-purpose feature.
 
 - **No runtime dependencies.** Plain Node, `require()`-based, zlib-only
   for PNG work (`lib/png.js`). Keep it that way unless there's a very
-  strong reason not to.
+  strong reason not to. `typescript`/`@minecraft/server` in
+  `devDependencies` are the one deliberate exception - test/authoring-time
+  only (they type-check `runtime/*.d.ts` against the real compiler,
+  OR-Track D2), never required to actually consume or run MinUI.
 - **Respect the one hard platform constraint.** A persistent HUD element
   cannot receive a click on any current public Bedrock API - see the
   README's "Architecture" section before proposing anything that assumes
