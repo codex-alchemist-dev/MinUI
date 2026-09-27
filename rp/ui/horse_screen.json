@@ -6,11 +6,43 @@
   "oc_item_container_items@common.container_item": {
     "$item_collection_name": "container_items"
   },
+  "oc_button_bg_codex_button": {
+    "type": "panel",
+    "controls": [
+      {
+        "bg": {
+          "type": "image",
+          "texture": "textures/ui/button_borderless_light",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "lbl": {
+          "type": "label",
+          "text": "Codex",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "text_alignment": "center",
+          "color": [
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    ]
+  },
   "oc_button_empty_renderer": {
     "type": "image"
   },
-  "oc_button_slot_container_items@common.container_item": {
+  "oc_button_item_codex_button@common.container_item": {
     "$item_collection_name": "container_items",
+    "$background_images": "horse.oc_button_bg_codex_button",
     "$item_renderer": "horse.oc_button_empty_renderer",
     "$stack_count_required": false,
     "$durability_bar_required": false,
@@ -1772,20 +1804,24 @@
               }
             },
             {
-              "codex_button_row_0": {
+              "grid_codex_button": {
                 "type": "stack_panel",
                 "orientation": "horizontal",
                 "size": [
-                  18,
-                  18
+                  162,
+                  36
                 ],
                 "collection_name": "container_items",
                 "controls": [
                   {
-                    "codex_button_cell_146@horse.oc_button_slot_container_items": {
+                    "codex_button_cell@horse.oc_button_item_codex_button": {
                       "size": [
-                        18,
-                        18
+                        162,
+                        36
+                      ],
+                      "$cell_image_size": [
+                        162,
+                        36
                       ],
                       "collection_index": 146
                     }
@@ -1796,50 +1832,6 @@
                 "offset": [
                   279,
                   82
-                ]
-              }
-            },
-            {
-              "codex_button_overlay": {
-                "type": "panel",
-                "anchor_from": "top_left",
-                "anchor_to": "top_left",
-                "offset": [
-                  279,
-                  82
-                ],
-                "size": [
-                  162,
-                  36
-                ],
-                "layer": 1,
-                "controls": [
-                  {
-                    "bg": {
-                      "type": "image",
-                      "texture": "textures/ui/button_borderless_light",
-                      "size": [
-                        "100%",
-                        "100%"
-                      ]
-                    }
-                  },
-                  {
-                    "lbl": {
-                      "type": "label",
-                      "text": "Codex",
-                      "size": [
-                        "100%",
-                        "100%"
-                      ],
-                      "text_alignment": "center",
-                      "color": [
-                        1,
-                        1,
-                        1
-                      ]
-                    }
-                  }
                 ]
               }
             },
