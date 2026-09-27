@@ -2,7 +2,7 @@
 
 A custom in-game UI framework for Minecraft Bedrock add-ons: an HTML/CSS-like
 screen language, a compiler that emits real Minecraft JSON UI, and a runtime
-that drives it from script. Originally built inside [OpenChara](https://github.com/Cookiesmuch/OpenChara),
+that drives it from script. Originally built inside [OpenChara](https://github.com/codex-alchemist-dev/OpenChara),
 pulled out into its own repo because it's a genuinely separate concern -
 OpenChara is a character/squad/tactical-AI framework; MinUI is just the UI
 layer any Bedrock add-on could use.
