@@ -6,6 +6,48 @@
   "oc_item_container_items@common.container_item": {
     "$item_collection_name": "container_items"
   },
+  "oc_button_bg_codex_button": {
+    "type": "panel",
+    "controls": [
+      {
+        "bg": {
+          "type": "image",
+          "texture": "textures/ui/button_borderless_light",
+          "size": [
+            "100%",
+            "100%"
+          ]
+        }
+      },
+      {
+        "lbl": {
+          "type": "label",
+          "text": "Codex",
+          "size": [
+            "100%",
+            "100%"
+          ],
+          "text_alignment": "center",
+          "color": [
+            1,
+            1,
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "oc_button_empty_renderer": {
+    "type": "image"
+  },
+  "oc_button_item_codex_button@common.container_item": {
+    "$item_collection_name": "container_items",
+    "$background_images": "horse.oc_button_bg_codex_button",
+    "$item_renderer": "horse.oc_button_empty_renderer",
+    "$stack_count_required": false,
+    "$durability_bar_required": false,
+    "$storage_bar_required": false
+  },
   "oc_panel": {
     "type": "panel",
     "controls": [
@@ -1758,6 +1800,38 @@
                       ]
                     }
                   }
+                ]
+              }
+            },
+            {
+              "grid_codex_button": {
+                "type": "stack_panel",
+                "orientation": "horizontal",
+                "size": [
+                  162,
+                  36
+                ],
+                "collection_name": "container_items",
+                "controls": [
+                  {
+                    "codex_button_cell@horse.oc_button_item_codex_button": {
+                      "size": [
+                        162,
+                        36
+                      ],
+                      "$cell_image_size": [
+                        162,
+                        36
+                      ],
+                      "collection_index": 146
+                    }
+                  }
+                ],
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "offset": [
+                  279,
+                  82
                 ]
               }
             },

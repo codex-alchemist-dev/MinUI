@@ -48,6 +48,15 @@ const hotbarY = START_Y + 10 * CELL + GAP; // below grid_B, its tallest section
 const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [bX, hotbarY] });
 const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [bX, hotbarY + CELL + SHORT_GAP] });
 
+// Codex-open button, below grid_C - same fix as the hotbar rows: a plain,
+// independent top-level section with its own explicit offset, NOT
+// attachTo (appending it into grid_C's own panel never rendered correctly
+// across two separate attempts this session - the underlying slot kept
+// landing in the wrong screen position). This uses the exact mechanism
+// already proven correct for every other section.
+const cX = bX + 9 * CELL + GAP; // same x as grid_C
+const codexButton = b.Button("codex_button", { text: "Codex", width: 9 * CELL, height: 2 * CELL, offset: [cX, START_Y + 3 * CELL + GAP] });
+
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
 const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
 const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
@@ -105,6 +114,7 @@ console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.end
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
 console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
 console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
+console.log(`codex_button (real Button): index ${codexButton.index}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
 console.log(`Equippable slots needed: ${b.equippableSlots.length} (write these into container_wide.json's minecraft:equippable.slots)`);
 console.log(`Panel size: ${panelW}x${rootH}`);
