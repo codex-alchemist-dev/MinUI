@@ -48,14 +48,49 @@ const hotbarY = START_Y + 10 * CELL + GAP; // below grid_B, its tallest section
 const hotbarRow1 = b.Inventory("hotbar1", 9, 1, { offset: [bX, hotbarY] });
 const hotbarRow2 = b.Inventory("hotbar2", 9, 1, { offset: [bX, hotbarY + CELL + SHORT_GAP] });
 
-// Codex-open button, below grid_C - same fix as the hotbar rows: a plain,
-// independent top-level section with its own explicit offset, NOT
-// attachTo (appending it into grid_C's own panel never rendered correctly
-// across two separate attempts this session - the underlying slot kept
-// landing in the wrong screen position). This uses the exact mechanism
-// already proven correct for every other section.
+// Codex-open button, below grid_C. Root cause of every earlier "emerald in
+// the wrong place" symptom, finally isolated: Button()'s underlying real
+// slot uses common.container_item's $item_renderer, a type:"custom"
+// native control - and that native item ICON ignores whatever JSON panel
+// position it's declared at. It renders wherever the engine's own
+// sequential slot auto-tiling puts the Nth container_items cell in
+// DOCUMENT ORDER (confirmed: moving codex_button to its own top-level
+// section fixed the surrounding bg/label panel's position, since those
+// are plain image/label controls that DO honor JSON layout - but the
+// native item icon itself still rendered inside hotbar2's row, exactly
+// where sequential auto-tiling of "the next cell after hotbar2's 9" would
+// land it). Every section that HAS rendered correctly all session
+// (equip/A/B/C/hotbar1/hotbar2) is a real, uniformly-sized grid cell
+// declared in row-major order - never a single differently-sized cell -
+// so this is the first control that ever broke that pattern.
+//
+// Fix: give the functional slot a real, plain, uniformly-sized cell
+// (Inventory() 9x1, identical shape to a hotbar row) so its native icon
+// auto-tiles into a position that happens to be exactly where we declared
+// it - then draw the "Codex" look as a SEPARATE decorative overlay (plain
+// image + label, not container_item, so it isn't subject to this at all)
+// on top of that row, at the same explicit offset. The real click target
+// is codexRow's first cell; the rest of the row is visually covered but
+// not separately interactive - acceptable for now, a wider real click
+// target would need N real identically-sized slots all wired as one
+// button, out of scope for this fix.
 const cX = bX + 9 * CELL + GAP; // same x as grid_C
-const codexButton = b.Button("codex_button", { text: "Codex", width: 9 * CELL, height: 2 * CELL, offset: [cX, START_Y + 3 * CELL + GAP] });
+const codexY = START_Y + 3 * CELL + GAP;
+const codexRow = b.Inventory("codexRow", 9, 1, { offset: [cX, codexY] });
+const CODEX_SLOT = codexRow.startIndex;
+const codexOverlay = {
+    codex_overlay: {
+        type: "panel",
+        anchor_from: "top_left",
+        anchor_to: "top_left",
+        offset: [cX, codexY],
+        size: [9 * CELL, CELL],
+        controls: [
+            { bg: { type: "image", texture: "textures/ui/button_borderless_light", size: ["100%", "100%"] } },
+            { lbl: { type: "label", text: "Codex", size: ["100%", "100%"], text_alignment: "center", color: [1, 1, 1] } },
+        ],
+    },
+};
 
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
 const contentBottom = hotbarY + CELL + SHORT_GAP + CELL;
@@ -81,6 +116,7 @@ const doc = {
                         { "horse_section_label@horse.horse_label": {} },
                         { "renderer@horse.horse_renderer": { offset: [7, 18] } },
                         ...b.controls,
+                        codexOverlay,
                         // Self-anchors to the bottom of root_panel (bottom_left/bottom_left,
                         // fixed 93px tall) - never pass an explicit offset here, it's
                         // measured from the BOTTOM edge, not the top (confirmed bug: an
@@ -114,7 +150,7 @@ console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.end
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
 console.log(`hotbar1 (Inventory, stacks): indices ${hotbarRow1.startIndex}-${hotbarRow1.endIndex}`);
 console.log(`hotbar2 (Inventory, stacks): indices ${hotbarRow2.startIndex}-${hotbarRow2.endIndex}`);
-console.log(`codex_button (real Button): index ${codexButton.index}`);
+console.log(`codex_button (real slot, decorative overlay): index ${CODEX_SLOT}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
 console.log(`Equippable slots needed: ${b.equippableSlots.length} (write these into container_wide.json's minecraft:equippable.slots)`);
 console.log(`Panel size: ${panelW}x${rootH}`);

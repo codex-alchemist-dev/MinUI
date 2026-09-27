@@ -6,48 +6,6 @@
   "oc_item_container_items@common.container_item": {
     "$item_collection_name": "container_items"
   },
-  "oc_button_bg_codex_button": {
-    "type": "panel",
-    "controls": [
-      {
-        "bg": {
-          "type": "image",
-          "texture": "textures/ui/button_borderless_light",
-          "size": [
-            "100%",
-            "100%"
-          ]
-        }
-      },
-      {
-        "lbl": {
-          "type": "label",
-          "text": "Codex",
-          "size": [
-            "100%",
-            "100%"
-          ],
-          "text_alignment": "center",
-          "color": [
-            1,
-            1,
-            1
-          ]
-        }
-      }
-    ]
-  },
-  "oc_button_empty_renderer": {
-    "type": "image"
-  },
-  "oc_button_item_codex_button@common.container_item": {
-    "$item_collection_name": "container_items",
-    "$background_images": "horse.oc_button_bg_codex_button",
-    "$item_renderer": "horse.oc_button_empty_renderer",
-    "$stack_count_required": false,
-    "$durability_bar_required": false,
-    "$storage_bar_required": false
-  },
   "oc_panel": {
     "type": "panel",
     "controls": [
@@ -1804,34 +1762,157 @@
               }
             },
             {
-              "grid_codex_button": {
+              "grid_codexRow": {
                 "type": "stack_panel",
-                "orientation": "horizontal",
+                "orientation": "vertical",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
                 "size": [
                   162,
-                  36
+                  18
                 ],
-                "collection_name": "container_items",
+                "offset": [
+                  279,
+                  82
+                ],
                 "controls": [
                   {
-                    "codex_button_cell@horse.oc_button_item_codex_button": {
+                    "codexRow_row_0": {
+                      "type": "stack_panel",
+                      "orientation": "horizontal",
                       "size": [
                         162,
-                        36
+                        18
                       ],
-                      "$cell_image_size": [
-                        162,
-                        36
-                      ],
-                      "collection_index": 146
+                      "collection_name": "container_items",
+                      "controls": [
+                        {
+                          "codexRow_cell_146@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 146
+                          }
+                        },
+                        {
+                          "codexRow_cell_147@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 147
+                          }
+                        },
+                        {
+                          "codexRow_cell_148@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 148
+                          }
+                        },
+                        {
+                          "codexRow_cell_149@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 149
+                          }
+                        },
+                        {
+                          "codexRow_cell_150@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 150
+                          }
+                        },
+                        {
+                          "codexRow_cell_151@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 151
+                          }
+                        },
+                        {
+                          "codexRow_cell_152@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 152
+                          }
+                        },
+                        {
+                          "codexRow_cell_153@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 153
+                          }
+                        },
+                        {
+                          "codexRow_cell_154@horse.oc_item_container_items": {
+                            "size": [
+                              18,
+                              18
+                            ],
+                            "collection_index": 154
+                          }
+                        }
+                      ]
                     }
                   }
-                ],
+                ]
+              }
+            },
+            {
+              "codex_overlay": {
+                "type": "panel",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
                 "offset": [
                   279,
                   82
+                ],
+                "size": [
+                  162,
+                  18
+                ],
+                "controls": [
+                  {
+                    "bg": {
+                      "type": "image",
+                      "texture": "textures/ui/button_borderless_light",
+                      "size": [
+                        "100%",
+                        "100%"
+                      ]
+                    }
+                  },
+                  {
+                    "lbl": {
+                      "type": "label",
+                      "text": "Codex",
+                      "size": [
+                        "100%",
+                        "100%"
+                      ],
+                      "text_alignment": "center",
+                      "color": [
+                        1,
+                        1,
+                        1
+                      ]
+                    }
+                  }
                 ]
               }
             },
