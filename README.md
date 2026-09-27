@@ -172,3 +172,13 @@ source (`packages/ui-compiler/src/faces/utils/swap.ts` and its own
 `docs/spikes/S4-toggle-group.md`) after two earlier, independent guesses
 both shipped broken - see `<tabs>` in `docs/UI.md` for the full four-attempt
 history.
+
+## Contributing
+
+Issues and PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the
+process and ground rules (no runtime dependencies, `node --check` before
+opening a PR, small focused changes).
+
+## License
+
+[MIT](LICENSE).
