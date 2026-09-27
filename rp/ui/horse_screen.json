@@ -93,10 +93,6 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [
-                  18,
-                  90
-                ],
                 "offset": [
                   7,
                   18
@@ -221,10 +217,6 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [
-                  18,
-                  72
-                ],
                 "offset": [
                   79,
                   18
@@ -327,10 +319,6 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [
-                  162,
-                  216
-                ],
                 "offset": [
                   107,
                   18
@@ -1473,10 +1461,6 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
-                "size": [
-                  162,
-                  90
-                ],
                 "offset": [
                   279,
                   18
