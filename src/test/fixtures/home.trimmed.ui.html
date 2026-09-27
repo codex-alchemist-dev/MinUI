@@ -1,0 +1,22 @@
+<screen id="home" data="home">
+  <panel class="window wide">
+    <column class="content">
+      <row class="line" style="height: 15">
+        <text class="title" style="width: fill">{t:cw.ui.home.title}</text>
+        <text class="dim" style="width: 150; text-align: right; height: 15">{count}/{max}  -  {summoned} {t:cw.ui.summoned_lower}</text>
+      </row>
+      <image src="textures/ui/cw/divider" class="divider"/>
+      <spacer style="height: 2"/>
+      <row class="line" style="height: 18">
+        <button class="half primary" on:press="open(roster)"><text class="dark-text center">{t:cw.ui.home.roster}</text></button>
+        <button class="half primary" on:press="open(summon)"><text class="dark-text center">{t:cw.ui.home.summon_new}</text></button>
+      </row>
+      <row class="line" style="height: 18">
+        <button class="half" on:press="open(squads)"><text class="center">{t:cw.ui.home.squads} ({squads})</text></button>
+        <button class="half" on:press="surround"><text class="center">{t:cw.ui.home.surround}</text></button>
+      </row>
+      <button class="menu" on:press="close"><text class="center">{t:cw.ui.close}</text></button>
+      <text class="dim center">{t:cw.ui.home.tip}</text>
+    </column>
+  </panel>
+</screen>

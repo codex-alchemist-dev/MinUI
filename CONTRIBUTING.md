@@ -7,12 +7,17 @@ assuming something is a finished, general-purpose feature.
 
 ## Ground rules
 
-- **No runtime dependencies.** Plain Node, `require()`-based, zlib-only
-  for PNG work (`lib/png.js`). Keep it that way unless there's a very
-  strong reason not to. `typescript`/`@minecraft/server` in
-  `devDependencies` are the one deliberate exception - test/authoring-time
-  only (they type-check `runtime/*.d.ts` against the real compiler,
-  OR-Track D2), never required to actually consume or run MinUI.
+- **No dependencies in the compiled pack output.** The actual JSON UI/BP-RP
+  MinUI produces is plain Node/`require()`-based with zero runtime
+  dependencies (zlib-only for PNG work, `lib/png.js`) - Bedrock's own
+  script engine has no npm anyway, so this was never really optional.
+  Build-time tooling dependencies (`typescript`, `@minecraft/server` types,
+  esbuild, or anything else genuinely useful for compiling/authoring) are
+  fully fine to add - there is no "zero dependencies, period" rule for this
+  project's own tooling, only for what actually ships. `typescript` is now
+  load-bearing, not just a type-check exercise: `src/compiler/screenCompiler.js`
+  (OR-Track D2) runs the real compiler on a mod's `.screen.tsx` files as
+  part of producing real output.
 - **Respect the one hard platform constraint.** A persistent HUD element
   cannot receive a click on any current public Bedrock API - see the
   README's "Architecture" section before proposing anything that assumes

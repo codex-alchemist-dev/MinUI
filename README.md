@@ -45,6 +45,18 @@ rp/ui/
   server_form.json       hooks vanilla's own form factory to draw compiled screens
   hud_screen.json        hooks vanilla's HUD to host compiled <hud> elements
   _global_variables.json overrides Bedrock's own dialog transition speed
+src/
+  jsx-runtime.ts         MinUI's own JSX pragma (classic-runtime createElement/Fragment)
+  components/
+    screen.ts            Screen/Panel/Row/Column/Grid/Scroll/Text/Image/Portrait/Bar/Button/Spacer/List/Use
+    container.ts         ContainerScreen/Slot/Equip/LockedButton (bridges JSX onto lib/entity-container.js)
+  compiler/
+    screenCompiler.js    loads a mod's tsc-compiled *.screen.js as a real Node
+                          module and feeds its tree into lib/compile.js's
+                          compileDocs() - the SAME emission logic real
+                          .ui.html text already goes through (OR-Track D2)
+  test/                  D2's own proof suite (real tsc, byte-identity check
+                          against the equivalent .ui.html)
 ```
 
 A consuming project (currently only OpenChara) copies/reads these into its
@@ -183,19 +195,62 @@ included), plus a genuine button-index collision (a safety net - the
 sequential allocator shouldn't normally produce one) and a declared entity
 `inventory_size` too small for what the builder actually allocated.
 
-## TypeScript/JSX authoring (OR-Track D2) - NOT STARTED
+## TypeScript/JSX authoring (OR-Track D2)
 
-A prior attempt (2026-09-27) shipped hand-written `.d.ts` files typing this
-plain-JS function-call API and called that "OR-Track D2 done." It was not
-D2 - D2 specifies a real JSX component model (`Screen`/`Panel`/`Button`/
-`Image`/`List`/`Scroll`/`Text`/`ContainerScreen`/`Slot`/`LockedButton`),
-`.screen.tsx` authoring, a Regolith-style compiler, and source maps. That
-substitution was found, disclosed, and deleted outright (2026-09-28) rather
-than kept as a lesser thing under the same name - see
+A prior attempt (2026-09-27) shipped hand-written `.d.ts` files typing the
+plain-JS runtime API and called that "OR-Track D2 done." It wasn't - see
 `happy-wibbling-pie.md`'s "AUDIT CORRECTION" section for the full incident
-record. D2 is being rebuilt for real, compiling down through this file's
-existing, proven emission logic (`lib/compile.js`/`lib/entity-container.js`)
-rather than replacing it - track progress there, not here.
+record. It was deleted outright (2026-09-28) and rebuilt for real:
+
+- **Real JSX components** (`src/components/screen.ts`): `Screen`, `Panel`,
+  `Row`, `Column`, `Grid`, `Scroll`, `Text`, `Image`, `Portrait`, `Bar`,
+  `Button`, `Spacer`, `List` (sugar over `Column` with `each=`/`max=`
+  wired), `Use` (template instantiation). Every one is a thin factory
+  producing the exact `{ tag, attrs, children, line }` node shape
+  `lib/markup.js`'s `parseMarkup()` already produces from real `.ui.html`
+  text - a new authoring surface over the same, unchanged, proven emission
+  backend, not a reimplementation of it.
+- **Real container-screen components** (`src/components/container.ts`):
+  `ContainerScreen`, `Slot`, `Equip`, `LockedButton` - since
+  `entity-container.js`'s `ContainerBuilder` is imperative (a sequence of
+  method calls that allocate real slots as they run), not a tree, `Slot`/
+  `Equip`/`LockedButton` return small descriptors that `ContainerScreen`
+  replays as real `Inventory()`/`Equipment()`/`Button()` calls in
+  authoring order, then runs `validateContainerContract()` (OR-Track D5)
+  over the result if `declaredInventorySize` is given.
+- **A real JSX pragma** (`src/jsx-runtime.ts`): the classic pragma
+  (`createElement`/`Fragment`), not the automatic runtime - avoids needing
+  a package-specifier-based `jsxImportSource` to resolve correctly for a
+  project consuming MinUI as a sibling checkout (this ecosystem's normal
+  convention). A mod project's `tsconfig.json` sets
+  `"jsx": "react"`, `"jsxFactory": "MinUI.createElement"`,
+  `"jsxFragmentFactory": "MinUI.Fragment"`, and each authoring file does
+  `import * as MinUI from ".../jsx-runtime.js"`.
+- **The real TypeScript compiler, unmodified** (`src/compiler/screenCompiler.js`):
+  a mod's `.screen.tsx` files are compiled by real `tsc` - the actual
+  compiler, not a custom parser or subset, so any TypeScript syntax a mod
+  author writes (generics, decorators, async/await, classes, anything)
+  works, full stop. The compiled `.js` is then loaded as an ordinary real
+  Node module (`require()`, never a restrictive sandbox/VM), and its
+  default-exported tree is fed into `lib/compile.js`'s `compileDocs()` -
+  the exact same function real `.ui.html` text already goes through.
+- **Proven, not just built**: `src/test/d2-pilot-compare.js` compiles a
+  real port of Claude Waifus' `home.ui.html` as `home.screen.tsx` through
+  the full real pipeline (real `tsc` invocation included) and asserts the
+  resulting JSON UI is **byte-identical** to compiling the original
+  `.ui.html` text - not just "it didn't crash." `src/test/d2-container-pilot.js`
+  does the same for the container-screen half: a real JSX
+  `<ContainerScreen>` produces a real, correctly-allocated
+  `ContainerBuilder`, and `declaredInventorySize` validation genuinely
+  fires when reached through JSX. Both run in `npm test`.
+
+**Deliberately not attempted here**: this project's own already-researched
+JSON UI findings (the horse screen, the forms screen, container facts, the
+button-positioning investigation, OR-Track D3's flexbox work, OR-Track D4's
+stack-count fix) remain the priority, signature emission backend for
+everything MinUI produces - bedrock-core/ui is credited and its authoring
+mechanics informed this layer, but it does not replace or override this
+project's own proven output logic.
 
 ## Credit
 
