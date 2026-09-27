@@ -37,19 +37,10 @@ lib/
   test/          entity-container.js's own test suite
 runtime/
   runtime.js     the form transport + expression evaluator + navigation stack
-  runtime.d.ts   hand-written types for runtime.js (OR-Track D2)
   hud.js         the persistent-HUD relay (title-channel data push)
-  hud.d.ts       hand-written types for hud.js
   container.js   chest-style container screens (a satchel entity)
-  container.d.ts hand-written types for container.js
   controlItems.js reusable "locked hotbar loadout, routed to handlers" helper
-  controlItems.d.ts hand-written types for controlItems.js
   i18n.js        per-player language override on top of RawMessage/{t:key}
-  i18n.d.ts      hand-written types for i18n.js
-types/
-  test/          type-check tests for the .d.ts files above (real tsc, see
-                 "TypeScript authoring" below)
-  tsconfig.example.json  a starting point for a mod project's own tsconfig
 rp/ui/
   server_form.json       hooks vanilla's own form factory to draw compiled screens
   hud_screen.json        hooks vanilla's HUD to host compiled <hud> elements
@@ -192,44 +183,34 @@ included), plus a genuine button-index collision (a safety net - the
 sequential allocator shouldn't normally produce one) and a declared entity
 `inventory_size` too small for what the builder actually allocated.
 
-## TypeScript authoring (OR-Track D2)
+## TypeScript/JSX authoring (OR-Track D2) - NOT STARTED
 
-**Authoring-layer-only** - a real, confirmed scope decision, not a partial
-implementation: a mod's own content scripts can be written in TypeScript
-against MinUI's real runtime API for full type-checking/autocomplete;
-MinUI's own compiler and runtime (`lib/`, `runtime/*.js`) stay plain,
-dependency-free JS forever. Nothing about MinUI's own build changes.
-
-- Each `runtime/*.js` file has a hand-written `runtime/*.d.ts` sitting
-  right next to it - TypeScript's own module resolution finds it
-  automatically for a relative `import ... from ".../runtime.js"`, no
-  bundler and no MinUI build step required.
-- `typescript` and `@minecraft/server` are **devDependencies only** (for
-  testing these `.d.ts` files against the real compiler) - MinUI's actual
-  runtime still has zero dependencies, per its own long-standing rule (see
-  `CONTRIBUTING.md`). A mod project that wants to author in TypeScript
-  adds its own `typescript` devDependency and compiles with a real `tsc`
-  step before OpenRock's build picks up the resulting plain `.js` as an
-  ordinary content script - see `types/tsconfig.example.json` for a
-  starting point.
-- `npm test` (`types/test/run.js`) runs the real TypeScript compiler
-  against two fixtures: `valid-sample.ts` (realistic usage of every typed
-  export across every runtime module - must type-check with zero errors)
-  and `invalid-sample.ts` (five deliberately wrong calls, one per real
-  mistake a mod author could make - must produce exactly five errors,
-  proving the types actually catch mistakes rather than accepting `any`).
+A prior attempt (2026-09-27) shipped hand-written `.d.ts` files typing this
+plain-JS function-call API and called that "OR-Track D2 done." It was not
+D2 - D2 specifies a real JSX component model (`Screen`/`Panel`/`Button`/
+`Image`/`List`/`Scroll`/`Text`/`ContainerScreen`/`Slot`/`LockedButton`),
+`.screen.tsx` authoring, a Regolith-style compiler, and source maps. That
+substitution was found, disclosed, and deleted outright (2026-09-28) rather
+than kept as a lesser thing under the same name - see
+`happy-wibbling-pie.md`'s "AUDIT CORRECTION" section for the full incident
+record. D2 is being rebuilt for real, compiling down through this file's
+existing, proven emission logic (`lib/compile.js`/`lib/entity-container.js`)
+rather than replacing it - track progress there, not here.
 
 ## Credit
 
+See [CREDITS.md](CREDITS.md) for the full list (bedrock-core/ui,
+EasyUIBuilder, mcbejsonuimasterAI) and exactly what was taken from each.
+
 The transport techniques this compiler builds on (form entries as a data
 channel, collection indices, container facts, the preserved-title-text HUD
-trick) were originally measured by [bedrock-core/ui](https://github.com/bedrock-core/ui)
-(MIT) - see its `docs/spikes`. Every one was re-verified in-game by this
-project before being relied on (see the consuming project's own UI-0 spike
-log for what was actually confirmed and when). `<tabs>`'s own working
-mechanism - a hand-built `type: "toggle"` with content nested inside
-`checked_control` - was found by reading `bedrock-core/ui`'s actual compiler
-source (`packages/ui-compiler/src/faces/utils/swap.ts` and its own
+trick) were originally measured by bedrock-core/ui - see its `docs/spikes`.
+Every one was re-verified in-game by this project before being relied on
+(see the consuming project's own UI-0 spike log for what was actually
+confirmed and when). `<tabs>`'s own working mechanism - a hand-built
+`type: "toggle"` with content nested inside `checked_control` - was found
+by reading `bedrock-core/ui`'s actual compiler source
+(`packages/ui-compiler/src/faces/utils/swap.ts` and its own
 `docs/spikes/S4-toggle-group.md`) after two earlier, independent guesses
 both shipped broken - see `<tabs>` in `docs/UI.md` for the full four-attempt
 history.

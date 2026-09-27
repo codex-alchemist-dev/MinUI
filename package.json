@@ -8,7 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node lib/test/entity-container.test.js && node types/test/run.js"
+    "test": "node lib/test/entity-container.test.js"
   },
   "devDependencies": {
     "@minecraft/server": "^2.6.0",
