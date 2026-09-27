@@ -30,8 +30,11 @@ lib/
   markup.js      the .ui.html/.ui.css parser
   compile.js     the compiler: markup -> JSON UI + a runtime field table
   lintjsonui.js  catches known "silent failure" JSON UI mistakes at build time
+  entity-container.js  Inventory()/Equipment()/Button() container-screen
+                 primitives + validateContainerContract() (OR-Track D5)
   png.js         a pure-Node PNG reader/writer (zlib only, no native deps)
   portraits.js   auto-crops a character portrait from its geometry + skin
+  test/          entity-container.js's own test suite
 runtime/
   runtime.js     the form transport + expression evaluator + navigation stack
   runtime.d.ts   hand-written types for runtime.js (OR-Track D2)
@@ -169,6 +172,25 @@ This sidesteps the whole click-capture question entirely, since it's driven
 by Bedrock's normal item-use/block-interact events, not by any on-screen
 control - real interactivity with zero dialog transition, at the cost of
 being keyboard/hotbar-driven rather than point-and-click.
+
+## Chest-contract validation (OR-Track D5)
+
+`entity-container.js`'s `validateContainerContract(builder, {declaredInventorySize})`
+does declarative, pre-deploy structural checks over a finished
+`ContainerBuilder` - modeled on mcbejsonuimasterAI's own chest-contract
+research pattern, every issue explicitly `runtimeVerified: false` (a
+structural consistency check, never a claim about real in-game behavior).
+
+A real, previously-silent bug class was found while writing this:
+`Inventory()`/`Equipment()`/`Button()` all assign
+`this.sections[label] = ...` with no duplicate-label guard anywhere - a
+second call reusing an earlier label silently overwrites that entry, so a
+later `attachTo` referencing that label attaches to the WRONG section with
+no error at all. `validateContainerContract()` now catches this (a new
+`allocatedLabels` array records every label a call ever used, duplicates
+included), plus a genuine button-index collision (a safety net - the
+sequential allocator shouldn't normally produce one) and a declared entity
+`inventory_size` too small for what the builder actually allocated.
 
 ## TypeScript authoring (OR-Track D2)
 
