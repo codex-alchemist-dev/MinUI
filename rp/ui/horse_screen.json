@@ -22,7 +22,7 @@
         "root_panel@common.root_panel": {
           "size": [
             448,
-            355
+            319
           ],
           "layer": 1,
           "controls": [
@@ -30,7 +30,7 @@
               "common_panel@common.common_panel": {
                 "size": [
                   448,
-                  355
+                  319
                 ]
               }
             },
@@ -51,6 +51,10 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
+                "size": [
+                  18,
+                  90
+                ],
                 "offset": [
                   7,
                   18
@@ -175,6 +179,10 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
+                "size": [
+                  18,
+                  72
+                ],
                 "offset": [
                   79,
                   18
@@ -277,6 +285,10 @@
                 "orientation": "vertical",
                 "anchor_from": "top_left",
                 "anchor_to": "top_left",
+                "size": [
+                  162,
+                  180
+                ],
                 "offset": [
                   107,
                   18
@@ -1221,9 +1233,27 @@
                         }
                       ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "grid_C": {
+                "type": "stack_panel",
+                "orientation": "vertical",
+                "anchor_from": "top_left",
+                "anchor_to": "top_left",
+                "size": [
+                  162,
+                  54
+                ],
+                "offset": [
+                  279,
+                  18
+                ],
+                "controls": [
                   {
-                    "B_row_10": {
+                    "C_row_0": {
                       "type": "stack_panel",
                       "orientation": "horizontal",
                       "size": [
@@ -1233,7 +1263,7 @@
                       "collection_name": "container_items",
                       "controls": [
                         {
-                          "B_cell_101@horse.oc_item_container_items": {
+                          "C_cell_101@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1242,7 +1272,7 @@
                           }
                         },
                         {
-                          "B_cell_102@horse.oc_item_container_items": {
+                          "C_cell_102@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1251,7 +1281,7 @@
                           }
                         },
                         {
-                          "B_cell_103@horse.oc_item_container_items": {
+                          "C_cell_103@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1260,7 +1290,7 @@
                           }
                         },
                         {
-                          "B_cell_104@horse.oc_item_container_items": {
+                          "C_cell_104@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1269,7 +1299,7 @@
                           }
                         },
                         {
-                          "B_cell_105@horse.oc_item_container_items": {
+                          "C_cell_105@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1278,7 +1308,7 @@
                           }
                         },
                         {
-                          "B_cell_106@horse.oc_item_container_items": {
+                          "C_cell_106@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1287,7 +1317,7 @@
                           }
                         },
                         {
-                          "B_cell_107@horse.oc_item_container_items": {
+                          "C_cell_107@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1296,7 +1326,7 @@
                           }
                         },
                         {
-                          "B_cell_108@horse.oc_item_container_items": {
+                          "C_cell_108@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1305,7 +1335,7 @@
                           }
                         },
                         {
-                          "B_cell_109@horse.oc_item_container_items": {
+                          "C_cell_109@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1317,7 +1347,7 @@
                     }
                   },
                   {
-                    "B_row_11": {
+                    "C_row_1": {
                       "type": "stack_panel",
                       "orientation": "horizontal",
                       "size": [
@@ -1327,7 +1357,7 @@
                       "collection_name": "container_items",
                       "controls": [
                         {
-                          "B_cell_110@horse.oc_item_container_items": {
+                          "C_cell_110@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1336,7 +1366,7 @@
                           }
                         },
                         {
-                          "B_cell_111@horse.oc_item_container_items": {
+                          "C_cell_111@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1345,7 +1375,7 @@
                           }
                         },
                         {
-                          "B_cell_112@horse.oc_item_container_items": {
+                          "C_cell_112@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1354,7 +1384,7 @@
                           }
                         },
                         {
-                          "B_cell_113@horse.oc_item_container_items": {
+                          "C_cell_113@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1363,7 +1393,7 @@
                           }
                         },
                         {
-                          "B_cell_114@horse.oc_item_container_items": {
+                          "C_cell_114@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1372,7 +1402,7 @@
                           }
                         },
                         {
-                          "B_cell_115@horse.oc_item_container_items": {
+                          "C_cell_115@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1381,7 +1411,7 @@
                           }
                         },
                         {
-                          "B_cell_116@horse.oc_item_container_items": {
+                          "C_cell_116@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1390,7 +1420,7 @@
                           }
                         },
                         {
-                          "B_cell_117@horse.oc_item_container_items": {
+                          "C_cell_117@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1399,7 +1429,7 @@
                           }
                         },
                         {
-                          "B_cell_118@horse.oc_item_container_items": {
+                          "C_cell_118@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
@@ -1409,23 +1439,9 @@
                         }
                       ]
                     }
-                  }
-                ]
-              }
-            },
-            {
-              "grid_C": {
-                "type": "stack_panel",
-                "orientation": "vertical",
-                "anchor_from": "top_left",
-                "anchor_to": "top_left",
-                "offset": [
-                  279,
-                  18
-                ],
-                "controls": [
+                  },
                   {
-                    "C_row_0": {
+                    "C_row_2": {
                       "type": "stack_panel",
                       "orientation": "horizontal",
                       "size": [
@@ -1519,188 +1535,22 @@
                     }
                   },
                   {
-                    "C_row_1": {
+                    "codex_button_row_0": {
                       "type": "stack_panel",
                       "orientation": "horizontal",
                       "size": [
-                        162,
+                        18,
                         18
                       ],
                       "collection_name": "container_items",
                       "controls": [
                         {
-                          "C_cell_128@horse.oc_item_container_items": {
+                          "codex_button_cell_128@horse.oc_item_container_items": {
                             "size": [
                               18,
                               18
                             ],
                             "collection_index": 128
-                          }
-                        },
-                        {
-                          "C_cell_129@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 129
-                          }
-                        },
-                        {
-                          "C_cell_130@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 130
-                          }
-                        },
-                        {
-                          "C_cell_131@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 131
-                          }
-                        },
-                        {
-                          "C_cell_132@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 132
-                          }
-                        },
-                        {
-                          "C_cell_133@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 133
-                          }
-                        },
-                        {
-                          "C_cell_134@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 134
-                          }
-                        },
-                        {
-                          "C_cell_135@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 135
-                          }
-                        },
-                        {
-                          "C_cell_136@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 136
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "C_row_2": {
-                      "type": "stack_panel",
-                      "orientation": "horizontal",
-                      "size": [
-                        162,
-                        18
-                      ],
-                      "collection_name": "container_items",
-                      "controls": [
-                        {
-                          "C_cell_137@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 137
-                          }
-                        },
-                        {
-                          "C_cell_138@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 138
-                          }
-                        },
-                        {
-                          "C_cell_139@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 139
-                          }
-                        },
-                        {
-                          "C_cell_140@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 140
-                          }
-                        },
-                        {
-                          "C_cell_141@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 141
-                          }
-                        },
-                        {
-                          "C_cell_142@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 142
-                          }
-                        },
-                        {
-                          "C_cell_143@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 143
-                          }
-                        },
-                        {
-                          "C_cell_144@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 144
-                          }
-                        },
-                        {
-                          "C_cell_145@horse.oc_item_container_items": {
-                            "size": [
-                              18,
-                              18
-                            ],
-                            "collection_index": 145
                           }
                         }
                       ]

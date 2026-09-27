@@ -27,26 +27,23 @@ const b = new ContainerBuilder("horse");
 const narrow = b.Equipment("equip_narrow", 1, 5, { offset: [7, START_Y] });
 
 // Back to the original reasonable 3-section design, dev-sized (full
-// vanilla 18px cells): A=1x4, B=9x12 (10 bulk rows + 2 extra "hotbar" rows
-// folded directly into B's own declared rows, not attached afterward -
-// see the file header's attachTo note), C=9x3. All real, independent
+// vanilla 18px cells): A=1x4, B=9x10, C=9x3. All real, independent
 // Inventory sections now (not mirrored windows like the old attempts).
-//
-// attachTo (appending extra rows into an existing section's stack_panel
-// after the fact) was tried twice for the hotbar rows and the codex
-// button and never rendered correctly either time (rows squeezed/
-// overlapping, then missing outright even with auto-sizing) - dropped
-// entirely per explicit instruction. The button is dropped too: it never
-// worked (no real channel exists to detect a JSON UI button press from a
-// container screen - see entity-container.js's Button() docs) and isn't
-// worth the trouble it caused. B's extra 2 rows use the exact same
-// Inventory() call already confirmed working for every other section.
 const gridA = b.Inventory("A", 1, 4, { offset: [START_X, START_Y] });
-const gridB = b.Inventory("B", 9, 12, { offset: [START_X + 1 * CELL + GAP, START_Y] });
+const gridB = b.Inventory("B", 9, 10, { offset: [START_X + 1 * CELL + GAP, START_Y] });
 const gridC = b.Inventory("C", 9, 3, { offset: [START_X + 1 * CELL + GAP + 9 * CELL + GAP, START_Y] });
 
+// DIAGNOSTIC (temporary): the attachTo fix did NOT change the symptom -
+// codex_button still rendered clustered with grid_C regardless of whether
+// it was a separate top-level panel or an attached row, so "top-level
+// panel count" was the wrong theory. Stripped back to a plain 1x1
+// Inventory (no button styling) and dropped the hotbar rows entirely, to
+// remove every possible confound - ui.js will seed every real index with
+// a distinct item so we can map ground truth directly instead of guessing.
+const codexButton = b.Inventory("codex_button", 1, 1, { attachTo: "C" });
+
 const panelW = START_X + 1 * CELL + GAP + 9 * CELL + GAP + 9 * CELL + 7;
-const contentBottom = START_Y + 12 * CELL;
+const contentBottom = START_Y + 10 * CELL; // grid_B's own height (tallest section)
 const rootH = contentBottom + 8 + 93 + 20; // content + margin + player inv panel (fixed 93px, self-anchors) + hotbar strip room
 
 const doc = {
@@ -100,6 +97,7 @@ console.log(`equip_narrow (Equipment, single-item): indices ${narrow.startIndex}
 console.log(`grid_A (Inventory, stacks): indices ${gridA.startIndex}-${gridA.endIndex}`);
 console.log(`grid_B (Inventory, stacks): indices ${gridB.startIndex}-${gridB.endIndex}`);
 console.log(`grid_C (Inventory, stacks): indices ${gridC.startIndex}-${gridC.endIndex}`);
+console.log(`codex_button (plain 1x1, diagnostic): index ${codexButton.startIndex}`);
 console.log(`Recommended container_items inventory_size (with headroom): ${b.recommendedInventorySize()}`);
 console.log(`Equippable slots needed: ${b.equippableSlots.length} (write these into container_wide.json's minecraft:equippable.slots)`);
 console.log(`Panel size: ${panelW}x${rootH}`);
