@@ -8,6 +8,8 @@
     "jsxFragmentFactory": "MinUI.Fragment",
     "strict": true,
     "allowJs": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "declaration": false,
     "sourceMap": true,
     "esModuleInterop": true,

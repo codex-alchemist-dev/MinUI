@@ -184,73 +184,47 @@ does declarative, pre-deploy structural checks over a finished
 research pattern, every issue explicitly `runtimeVerified: false` (a
 structural consistency check, never a claim about real in-game behavior).
 
-A real, previously-silent bug class was found while writing this:
-`Inventory()`/`Equipment()`/`Button()` all assign
-`this.sections[label] = ...` with no duplicate-label guard anywhere - a
-second call reusing an earlier label silently overwrites that entry, so a
-later `attachTo` referencing that label attaches to the WRONG section with
-no error at all. `validateContainerContract()` now catches this (a new
-`allocatedLabels` array records every label a call ever used, duplicates
-included), plus a genuine button-index collision (a safety net - the
-sequential allocator shouldn't normally produce one) and a declared entity
+`Inventory()`/`Equipment()`/`Button()` assign `this.sections[label] = ...`
+with no duplicate-label guard - a second call reusing an earlier label
+silently overwrites that entry, so a later `attachTo` referencing that
+label attaches to the wrong section with no error. `validateContainerContract()`
+catches this (an `allocatedLabels` array records every label a call ever
+used, duplicates included), plus a genuine button-index collision (a safety
+net - the sequential allocator shouldn't normally produce one) and a declared entity
 `inventory_size` too small for what the builder actually allocated.
 
-## TypeScript/JSX authoring (OR-Track D2)
+## TypeScript/JSX authoring
 
-A prior attempt (2026-09-27) shipped hand-written `.d.ts` files typing the
-plain-JS runtime API and called that "OR-Track D2 done." It wasn't - see
-`happy-wibbling-pie.md`'s "AUDIT CORRECTION" section for the full incident
-record. It was deleted outright (2026-09-28) and rebuilt for real:
+Screens can be authored as `.screen.tsx` instead of `.ui.html`, using real
+JSX compiled by the real TypeScript compiler - any TypeScript syntax works
+(generics, decorators, async/await, classes), since there is no custom
+parser or subset involved.
 
-- **Real JSX components** (`src/components/screen.ts`): `Screen`, `Panel`,
-  `Row`, `Column`, `Grid`, `Scroll`, `Text`, `Image`, `Portrait`, `Bar`,
-  `Button`, `Spacer`, `List` (sugar over `Column` with `each=`/`max=`
-  wired), `Use` (template instantiation). Every one is a thin factory
-  producing the exact `{ tag, attrs, children, line }` node shape
-  `lib/markup.js`'s `parseMarkup()` already produces from real `.ui.html`
-  text - a new authoring surface over the same, unchanged, proven emission
-  backend, not a reimplementation of it.
-- **Real container-screen components** (`src/components/container.ts`):
-  `ContainerScreen`, `Slot`, `Equip`, `LockedButton` - since
-  `entity-container.js`'s `ContainerBuilder` is imperative (a sequence of
-  method calls that allocate real slots as they run), not a tree, `Slot`/
-  `Equip`/`LockedButton` return small descriptors that `ContainerScreen`
-  replays as real `Inventory()`/`Equipment()`/`Button()` calls in
-  authoring order, then runs `validateContainerContract()` (OR-Track D5)
-  over the result if `declaredInventorySize` is given.
-- **A real JSX pragma** (`src/jsx-runtime.ts`): the classic pragma
-  (`createElement`/`Fragment`), not the automatic runtime - avoids needing
-  a package-specifier-based `jsxImportSource` to resolve correctly for a
-  project consuming MinUI as a sibling checkout (this ecosystem's normal
-  convention). A mod project's `tsconfig.json` sets
-  `"jsx": "react"`, `"jsxFactory": "MinUI.createElement"`,
-  `"jsxFragmentFactory": "MinUI.Fragment"`, and each authoring file does
-  `import * as MinUI from ".../jsx-runtime.js"`.
-- **The real TypeScript compiler, unmodified** (`src/compiler/screenCompiler.js`):
-  a mod's `.screen.tsx` files are compiled by real `tsc` - the actual
-  compiler, not a custom parser or subset, so any TypeScript syntax a mod
-  author writes (generics, decorators, async/await, classes, anything)
-  works, full stop. The compiled `.js` is then loaded as an ordinary real
-  Node module (`require()`, never a restrictive sandbox/VM), and its
-  default-exported tree is fed into `lib/compile.js`'s `compileDocs()` -
-  the exact same function real `.ui.html` text already goes through.
-- **Proven, not just built**: `src/test/d2-pilot-compare.js` compiles a
-  real port of Claude Waifus' `home.ui.html` as `home.screen.tsx` through
-  the full real pipeline (real `tsc` invocation included) and asserts the
-  resulting JSON UI is **byte-identical** to compiling the original
-  `.ui.html` text - not just "it didn't crash." `src/test/d2-container-pilot.js`
-  does the same for the container-screen half: a real JSX
-  `<ContainerScreen>` produces a real, correctly-allocated
-  `ContainerBuilder`, and `declaredInventorySize` validation genuinely
-  fires when reached through JSX. Both run in `npm test`.
+- `src/components/screen.ts` - `Screen`, `Panel`, `Row`, `Column`, `Grid`,
+  `Scroll`, `Text`, `Image`, `Portrait`, `Bar`, `Button`, `Spacer`, `List`
+  (sugar over `Column` with `each=`/`max=`), `Use` (template
+  instantiation). Each is a thin factory producing the same
+  `{ tag, attrs, children, line }` node shape `lib/markup.js`'s
+  `parseMarkup()` produces from `.ui.html` text, so both authoring formats
+  compile through the identical `lib/compile.js` emission logic.
+- `src/components/container.ts` - `ContainerScreen`, `Slot`, `Equip`,
+  `LockedButton` for chest-style container screens. `entity-container.js`'s
+  `ContainerBuilder` is imperative (its methods allocate real slots as they
+  run), so `Slot`/`Equip`/`LockedButton` return small descriptors that
+  `ContainerScreen` replays as `Inventory()`/`Equipment()`/`Button()` calls
+  in authoring order, then runs `validateContainerContract()` over the
+  result when `declaredInventorySize` is given.
+- `src/jsx-runtime.ts` - the classic JSX pragma (`createElement`/
+  `Fragment`). A consuming project's `tsconfig.json` sets `"jsx": "react"`,
+  `"jsxFactory": "MinUI.createElement"`, `"jsxFragmentFactory": "MinUI.Fragment"`,
+  and each authoring file does `import * as MinUI from ".../jsx-runtime.js"`.
+- `src/compiler/screenCompiler.js` - compiles `.screen.tsx` with real
+  `tsc`, loads the compiled `.js` as an ordinary Node module, and feeds its
+  default-exported tree into `lib/compile.js`'s `compileDocs()`.
 
-**Deliberately not attempted here**: this project's own already-researched
-JSON UI findings (the horse screen, the forms screen, container facts, the
-button-positioning investigation, OR-Track D3's flexbox work, OR-Track D4's
-stack-count fix) remain the priority, signature emission backend for
-everything MinUI produces - bedrock-core/ui is credited and its authoring
-mechanics informed this layer, but it does not replace or override this
-project's own proven output logic.
+`src/test/d2-pilot-compare.js` and `src/test/d2-container-pilot.js` (run by
+`npm test`) compile real screens through this path and check the output
+against the equivalent hand-written `.ui.html`/`ContainerBuilder` calls.
 
 ## Credit
 
@@ -259,16 +233,12 @@ EasyUIBuilder, mcbejsonuimasterAI) and exactly what was taken from each.
 
 The transport techniques this compiler builds on (form entries as a data
 channel, collection indices, container facts, the preserved-title-text HUD
-trick) were originally measured by bedrock-core/ui - see its `docs/spikes`.
-Every one was re-verified in-game by this project before being relied on
-(see the consuming project's own UI-0 spike log for what was actually
-confirmed and when). `<tabs>`'s own working mechanism - a hand-built
-`type: "toggle"` with content nested inside `checked_control` - was found
-by reading `bedrock-core/ui`'s actual compiler source
-(`packages/ui-compiler/src/faces/utils/swap.ts` and its own
-`docs/spikes/S4-toggle-group.md`) after two earlier, independent guesses
-both shipped broken - see `<tabs>` in `docs/UI.md` for the full four-attempt
-history.
+trick) were measured by bedrock-core/ui - see its `docs/spikes`. `<tabs>`
+uses a hand-built `type: "toggle"` with content nested inside
+`checked_control`, per `bedrock-core/ui`'s own compiler source
+(`packages/ui-compiler/src/faces/utils/swap.ts` and
+`docs/spikes/S4-toggle-group.md`) - see `<tabs>` in `docs/UI.md` for how it
+works.
 
 ## Contributing
 
