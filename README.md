@@ -36,6 +36,8 @@ lib/
   layout/grid.js chunkRows() - the cols x rows grid-chunking math shared by
                  compile.js's <grid> and entity-container.js's Inventory()/
                  Equipment() (OR-Track D3)
+  modifications.js  applyModifications() - non-destructive patching of a
+                 named-control JSON UI tree at build time (OR-Track D6)
   png.js         a pure-Node PNG reader/writer (zlib only, no native deps)
   portraits.js   auto-crops a character portrait from its geometry + skin
   test/          entity-container.js's own test suite
@@ -218,6 +220,23 @@ are tagged `runtimeVerified: false`):
   an `allocatedLabels` array recording every label a call ever used,
   duplicates included. Also checks a declared entity `inventory_size` too
   small for what the builder actually allocated.
+
+## Non-destructive patching (OR-Track D6)
+
+`lib/modifications.js`'s `applyModifications(baseJson, modList)` patches a
+named-control JSON UI tree at build time instead of replacing a whole file -
+`insert_back`/`insert_front`/`insert_after`/`insert_before`/`move_back`/
+`move_front`/`move_after`/`move_before`/`swap`/`replace`/`remove`, matching
+[EasyUIBuilder](https://github.com/Refaltor77/EasyUIBuilder)'s vocabulary
+(credited, see [CREDITS.md](CREDITS.md)). Each modification names a
+control by its own key (matched even through an `@namespace.template`
+reference), operating on an array resolved by a dot-path (`target:
+"screen_home.controls"`). This computes the final merged JSON directly in
+plain JS rather than emitting Bedrock's own native `"modifications"` array
+- that format's documented support only covers `insert_back`/`insert_front`
+against a real resource-pack load order, with no findable documentation of
+an anchor syntax for the other operations, so this stays a build-time tool
+producing final output, the same real role EasyUIBuilder itself plays.
 
 ## TypeScript/JSX authoring
 
