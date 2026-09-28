@@ -13,17 +13,19 @@
 // from real .ui.html/.ui.css files, so nothing downstream needs to know or
 // care which authoring format a given mod used.
 "use strict";
-const fs = require("fs");
 const path = require("path");
 const { compileDocs } = require("../../lib/compile.js");
 const { parseCss } = require("../../lib/markup.js");
+const { requireCompiled } = require("../jsxCompile.js");
 
 // A compiled `.screen.js` file's default export is the node tree built by
 // src/components/*.ts + src/jsx-runtime.ts - either a single <screen>/<hud>
 // node, or an array of them (a file can export more than one screen).
+// requireCompiled() (src/jsxCompile.js, OR-Track M) is the same real,
+// cache-busting compiled-module loader OpenRock's own entity/manifest DSLs
+// now share - one implementation, not a second copy of this exact logic.
 function loadCompiledScreen(absPath) {
-    delete require.cache[require.resolve(absPath)];
-    const mod = require(absPath);
+    const mod = requireCompiled(absPath);
     const exported = mod.default ?? mod;
     const nodes = Array.isArray(exported) ? exported : [exported];
     for (const n of nodes) {
