@@ -47,4 +47,12 @@ const animKeys = Object.keys(fromSwitchJsx.rp["ui/openchara/screens.json"]).filt
 assert.strictEqual(animKeys.length, 1, "the <Animate> inside <Case value=\"legendary\"> registers one real animation definition");
 console.log("ok - <switch>/<case>/<default>/<animate> are reachable from JSX, not just .ui.html");
 
-console.log(`\n2 passed`);
+const fromKeyframesJsx = compileScreens({
+    compiledScreenFiles: [path.join(ROOT, "dist", "src", "test", "fixtures", "keyframes-jsx-check.screen.js")],
+    cssFiles: [],
+});
+const kfAnimKeys = Object.keys(fromKeyframesJsx.rp["ui/openchara/screens.json"]).filter(k => k.startsWith("anim_"));
+assert.strictEqual(kfAnimKeys.length, 6, "<Keyframes curve=\"catmull-rom\" steps={6}> bakes into 6 chained segments, reachable from JSX");
+console.log("ok - <Keyframes>/<Key> (real keyframing + Catmull-Rom) are reachable from JSX, not just .ui.html");
+
+console.log(`\n3 passed`);

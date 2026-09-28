@@ -107,6 +107,35 @@ export function Animate(props: AnimateProps): UiNode {
     return { tag: "animate", attrs, children: [], line: 0 };
 }
 
+/**
+ * <keyframes property="offset" duration="0.6" [loop] [curve="catmull-rom"] [steps]>
+ *   <Key at={0} value="[0,0]"/>
+ *   <Key at={0.5} value="[10,-20]" easing="out_bounce"/>
+ *   <Key at={1} value="[0,0]" easing="in_quad"/>
+ * </keyframes>
+ * - real multi-waypoint keyframing / Catmull-Rom spline motion, same
+ * semantics and syntax as the .ui.html form (see lib/compile.js's
+ * keyframesEl()) since both compile through the identical function.
+ */
+export interface KeyframesProps {
+    property: string;
+    duration: string | number;
+    loop?: boolean;
+    curve?: "catmull-rom";
+    steps?: string | number;
+    children?: unknown;
+}
+export function Keyframes(props: KeyframesProps): UiNode {
+    const { children, loop, ...rest } = props;
+    const attrs: Record<string, unknown> = { ...rest };
+    if (loop !== undefined) attrs.loop = String(loop);
+    return { tag: "keyframes", attrs, children: (children ?? []) as UiChild[], line: 0 };
+}
+export interface KeyProps { at: string | number; value: string; easing?: string; }
+export function Key(props: KeyProps): UiNode {
+    return { tag: "key", attrs: { at: String(props.at), value: props.value, ...(props.easing ? { easing: props.easing } : {}) }, children: [], line: 0 };
+}
+
 /** <switch on="c.rarity"><Case value="legendary">...</Case><Default>...</Default></switch> */
 export interface SwitchProps { on: string; children?: unknown; }
 export function Switch(props: SwitchProps): UiNode {

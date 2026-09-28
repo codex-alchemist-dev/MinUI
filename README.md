@@ -39,6 +39,8 @@ lib/
                  Equipment() (OR-Track D3)
   modifications.js  applyModifications() - non-destructive patching of a
                  named-control JSON UI tree at build time (OR-Track D6)
+  easing.js      cubic-bezier() + Catmull-Rom interpolation math for
+                 <animate>/<keyframes>'s custom-curve baking
   png.js         a pure-Node PNG reader/writer (zlib only, no native deps)
   portraits.js   auto-crops a character portrait from its geometry + skin
   test/          entity-container.js's own test suite
@@ -269,32 +271,95 @@ saying which. Available from JSX too: `Switch`/`Case`/`Default` in
 
 ## Animations
 
-Two layers, both compiling to Bedrock's real native `anims`/animation-
-definition mechanism (`lib/compile.js`'s `anim()`):
+**The one hard platform fact behind everything below**: Bedrock's native
+animation player is strictly two-point (`from`/`to`) with a fixed, closed
+easing enum - there is no native multi-keyframe definition and no way to
+hand it a custom curve function. Every layer here either uses that native
+mechanism directly, or - for keyframing and custom curves - BAKES the
+richer behavior at compile time into a chain of real native two-point
+animations linked via `next` (the exact same chaining this file's own
+`pulse` CSS sugar already used, just generalized). Nothing here claims
+Bedrock evaluates a curve per frame; a baked chain is real JSON, inspectable
+like any other.
 
-- **CSS sugar** for the common on-create cases: `style="fade-in: 0.4s"`,
-  `style="fade-in: 0.4s 0.2s"` (with a delay), `style="slide-from: -20 0 0.3s"`
-  (dx dy duration \[delay\]), `style="pulse: 1.2s"`, `style="easing: out-back"`.
-  These play once when the control is created (the screen is shown) - built
-  for reveals and attention pulses, not general-purpose triggers.
-- **`<animate>`** - a full escape hatch onto every native `anim_type`
-  (`alpha`/`clip`/`color`/`flip_book`/`offset`/`size`/`uv`/`wait`/
-  `aseprite_flip_book`) and every trigger (`play_event`/`start_event`/
-  `end_event`/`reset_event`, not just on-create), for anything the CSS
-  sugar doesn't cover:
-  ```html
-  <image src="textures/ui/cw/glow">
-    <animate type="color" duration="0.3" easing="out_quad"
-             from="[1,1,1]" to="[0.5,0,0]" play_event="button.confirm"/>
-  </image>
-  ```
-  `from`/`to`/`initial_uv` take a JSON literal (a number or `[x,y,...]`).
-  `next="otherAnim"` chains into another `<animate>` on the same or a
-  different element (auto-namespaced unless already `@ns.name`). Multiple
-  `<animate>` children on one element all attach, in order; one inside an
-  `each=""`-repeated element gets its own independent animation per
-  instance, not one shared across all of them. Available from JSX too:
-  `Animate` in `src/components/screen.ts`.
+### CSS sugar
+
+The common on-create cases: `style="fade-in: 0.4s"`, `style="fade-in: 0.4s 0.2s"`
+(with a delay), `style="slide-from: -20 0 0.3s"` (dx dy duration \[delay\]),
+`style="pulse: 1.2s"`, `style="easing: out-back"`. These play once when the
+control is created (the screen is shown) - built for reveals and attention
+pulses, not general-purpose triggers.
+
+### `<animate>` - full native escape hatch
+
+Every native `anim_type` (`alpha`/`clip`/`color`/`flip_book`/`offset`/`size`/
+`uv`/`wait`/`aseprite_flip_book`) and every trigger (`play_event`/
+`start_event`/`end_event`/`reset_event`, not just on-create):
+```html
+<image src="textures/ui/cw/glow">
+  <animate type="color" duration="0.3" easing="out_quad"
+           from="[1,1,1]" to="[0.5,0,0]" play_event="button.confirm"/>
+</image>
+```
+`from`/`to`/`initial_uv` take a JSON literal (a number or `[x,y,...]`).
+`next="otherAnim"` chains into another `<animate>` on the same or a
+different element (auto-namespaced unless already `@ns.name`). Multiple
+`<animate>` children on one element all attach, in order; one inside an
+`each=""`-repeated element gets its own independent animation per instance,
+not one shared across all of them.
+
+`easing=` accepts any of the 32 real native values (validated - a typo is a
+compile error naming every valid one, not silently-broken JSON), **including
+the springy/bouncy ones already built into Bedrock itself**: `out_bounce`,
+`in_out_elastic`, `out_back`, `spring`, and their `in_`/`out_`/`in_out_`
+variants for quad/cubic/quart/quint/sine/expo/circ - no custom curve needed
+for "bouncy," it's already there.
+
+### `<keyframes>` - real multi-waypoint keyframing
+
+After Effects/Blender/CSS-`@keyframes`-style: as many named-time waypoints
+as you want, each with its own easing:
+```html
+<image src="a">
+  <keyframes property="offset" duration="0.6">
+    <key at="0" value="[0,0]"/>
+    <key at="0.5" value="[10,-20]" easing="out_bounce"/>
+    <key at="1" value="[0,0]" easing="in_quad"/>
+  </keyframes>
+</image>
+```
+Compiles to one real chained native animation per segment between adjacent
+keys - `at="0"` and `at="1"` are required (the start and end), any number
+of keys in between. A `<key>`'s own `easing` governs the segment leading
+INTO it (nothing animates into the first key, so it needs none).
+`loop="true"` makes the whole chain a real cycle (the final segment's
+`next` points back to the first) - verified to still loop correctly even
+when a segment is itself a baked custom-curve sub-chain (below).
+
+### Custom curves: `cubic-bezier()` and Catmull-Rom
+
+`easing="cubic-bezier(x1,y1,x2,y2)"` (same 4-number form as CSS) works on
+`<animate>` and on any individual `<key>`, baked into `steps` (default 12,
+override with `steps="N"`) chained linear native segments approximating the
+real curve shape - the standard algorithm real browsers use (Newton-Raphson
+solve for the Bezier parameter, with a bisection fallback), not a rough guess.
+
+`<keyframes curve="catmull-rom">` is a different, more powerful mode for a
+whole path through several waypoints: instead of pairwise-eased segments,
+the entire VALUE path is a real Catmull-Rom spline through every key
+(sampled into `steps`, default 16, chained linear segments) - the spline
+passes **exactly** through every key's own value, unlike chaining plain
+segments between them, which is what makes it fit a smooth multi-point
+motion path (a bouncy patrol route, a camera sweep) better than manual
+easing between each pair. Per-key `easing` is ignored in this mode - the
+curve shape itself is the easing. Works for both vector (`[x,y]`) and
+scalar values.
+
+Both `<animate>` and `<keyframes>` are available from JSX too: `Animate`,
+`Keyframes`, `Key` in `src/components/screen.ts`. The interpolation math
+itself (`lib/easing.js`) is unit-tested independently of the compiler:
+Bezier endpoint/monotonicity/identity-curve checks, and confirming the
+Catmull-Rom spline passes exactly through every control point.
 
 ## Non-destructive patching (OR-Track D6)
 
