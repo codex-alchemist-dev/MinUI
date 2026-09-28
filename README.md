@@ -27,7 +27,8 @@ verified constraint and what MinUI does about it.
 
 ```
 lib/
-  markup.js      the .ui.html/.ui.css parser
+  markup.js      the .ui.html/.ui.css parser, incl. CSS custom properties
+                 (resolveVars/substituteVars)
   compile.js     the compiler: markup -> JSON UI + a runtime field table
   lintjsonui.js  catches known "silent failure" and crash-causing JSON UI
                  mistakes at build time (OR-Track D5)
@@ -225,6 +226,27 @@ are tagged `runtimeVerified: false`):
   an `allocatedLabels` array recording every label a call ever used,
   duplicates included. Also checks a declared entity `inventory_size` too
   small for what the builder actually allocated.
+
+## Theming: CSS custom properties
+
+```css
+/* theme.ui.css */
+screen { --accent: #ffcc00; --accent-hover: var(--accent); }
+```
+```html
+<button style="background-color: var(--accent)">
+```
+`var(--name)` and `var(--name, fallback)` work in any CSS-rule declaration
+AND in a node's own inline `style="..."` attribute (a genuinely separate
+code path from rule matching - both are covered). Resolved once, globally,
+across every loaded `.ui.css` file combined - a variable declared in
+`theme.ui.css` is visible from any other file's rules or inline styles, not
+scoped to wherever it happens to be declared (this project's whole CSS
+model is already a documented simplified subset, so a flat global
+namespace is the honest scope here rather than a half-built cascade). One
+level of a variable referencing another variable resolves fully
+(`--accent-hover: var(--accent)`); an undefined variable with no fallback
+resolves to an empty string, matching real CSS `var()` behavior.
 
 ## Polymorphic rendering: `<switch>`
 
