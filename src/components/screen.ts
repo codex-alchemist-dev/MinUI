@@ -74,3 +74,48 @@ export function List(props: ListProps): UiNode {
 export function Use(props: { t: string }): UiNode {
     return { tag: "use", attrs: { t: props.t }, children: [], line: 0 };
 }
+
+/**
+ * <animate type="alpha|clip|color|flip_book|offset|size|uv|wait|aseprite_flip_book" .../>
+ * - a full escape hatch onto Bedrock's native animation schema, as a child
+ * of the element it animates. `from`/`to`/`initial_uv` take a JSON-literal
+ * string, e.g. `from="[0,0]"` or `from="0"` (matching the .ui.html syntax
+ * exactly, since both authoring formats compile through the same
+ * registerAnimation() in lib/compile.js).
+ */
+export interface AnimateProps {
+    type: string;
+    duration?: string | number;
+    easing?: string;
+    from?: string;
+    to?: string;
+    initial_uv?: string;
+    next?: string;
+    "play_event"?: string;
+    "start_event"?: string;
+    "end_event"?: string;
+    "reset_event"?: string;
+    reversible?: boolean;
+    resettable?: boolean;
+    fps?: string | number;
+    frame_count?: string | number;
+    frame_step?: string | number;
+}
+export function Animate(props: AnimateProps): UiNode {
+    const attrs: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(props)) attrs[k] = typeof v === "boolean" ? String(v) : v;
+    return { tag: "animate", attrs, children: [], line: 0 };
+}
+
+/** <switch on="c.rarity"><Case value="legendary">...</Case><Default>...</Default></switch> */
+export interface SwitchProps { on: string; children?: unknown; }
+export function Switch(props: SwitchProps): UiNode {
+    return { tag: "switch", attrs: { on: props.on }, children: (props.children ?? []) as UiChild[], line: 0 };
+}
+export interface CaseProps { value: string | number; children?: unknown; }
+export function Case(props: CaseProps): UiNode {
+    return { tag: "case", attrs: { value: String(props.value) }, children: (props.children ?? []) as UiChild[], line: 0 };
+}
+export function Default(props: { children?: unknown }): UiNode {
+    return { tag: "default", attrs: {}, children: (props.children ?? []) as UiChild[], line: 0 };
+}

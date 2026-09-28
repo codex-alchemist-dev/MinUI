@@ -226,6 +226,25 @@ are tagged `runtimeVerified: false`):
   duplicates included. Also checks a declared entity `inventory_size` too
   small for what the builder actually allocated.
 
+## Polymorphic rendering: `<switch>`
+
+Pure sugar over `if=""` - no new runtime concept, so it's zero-cost to add
+and just as reliable as `if=""` already is:
+```html
+<switch on="c.rarity">
+  <case value="legendary"><text class="legendary">{c.name}</text></case>
+  <case value="rare"><text class="rare">{c.name}</text></case>
+  <default><text>{c.name}</text></default>
+</switch>
+```
+Each `<case>` compiles to `if="(on) == value"`; `<default>` (at most one,
+optional) gets the negation of every case ANDed together - if it's the only
+child, the whole thing needs no gating at all (always shown). A `value`
+that parses as a plain number compares numerically; anything else compares
+as a string, so `on="c.level"` and `on="c.rarity"` both "just work" without
+saying which. Available from JSX too: `Switch`/`Case`/`Default` in
+`src/components/screen.ts`.
+
 ## Animations
 
 Two layers, both compiling to Bedrock's real native `anims`/animation-
@@ -252,7 +271,8 @@ definition mechanism (`lib/compile.js`'s `anim()`):
   different element (auto-namespaced unless already `@ns.name`). Multiple
   `<animate>` children on one element all attach, in order; one inside an
   `each=""`-repeated element gets its own independent animation per
-  instance, not one shared across all of them.
+  instance, not one shared across all of them. Available from JSX too:
+  `Animate` in `src/components/screen.ts`.
 
 ## Non-destructive patching (OR-Track D6)
 

@@ -34,4 +34,17 @@ assert.deepStrictEqual(fromTsx.rp["ui/openchara/screens.json"].screen_home, from
     "the .screen.tsx-authored screen must compile to BYTE-IDENTICAL JSON UI as the equivalent .ui.html-authored one");
 assert.deepStrictEqual(fromTsx.stats, fromHtml.stats, "runtime field counts must match exactly");
 console.log("ok - OR-Track D2: a real .screen.tsx compiles through the proven backend to IDENTICAL JSON UI as the equivalent .ui.html");
-console.log(`\n1 passed`);
+
+// <switch>/<case>/<default>/<animate> (added after D2's initial ship) must
+// also be reachable from JSX, not just .ui.html - compiled with the same
+// tsc invocation above (no need to run it twice).
+const fromSwitchJsx = compileScreens({
+    compiledScreenFiles: [path.join(ROOT, "dist", "src", "test", "fixtures", "switch-animate.screen.js")],
+    cssFiles: [],
+});
+assert.strictEqual(fromSwitchJsx.stats.rarity_demo, 3, "3 switch branches -> 3 runtime fields");
+const animKeys = Object.keys(fromSwitchJsx.rp["ui/openchara/screens.json"]).filter(k => k.startsWith("anim_"));
+assert.strictEqual(animKeys.length, 1, "the <Animate> inside <Case value=\"legendary\"> registers one real animation definition");
+console.log("ok - <switch>/<case>/<default>/<animate> are reachable from JSX, not just .ui.html");
+
+console.log(`\n2 passed`);
