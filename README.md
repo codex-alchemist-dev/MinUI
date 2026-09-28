@@ -226,6 +226,34 @@ are tagged `runtimeVerified: false`):
   duplicates included. Also checks a declared entity `inventory_size` too
   small for what the builder actually allocated.
 
+## Animations
+
+Two layers, both compiling to Bedrock's real native `anims`/animation-
+definition mechanism (`lib/compile.js`'s `anim()`):
+
+- **CSS sugar** for the common on-create cases: `style="fade-in: 0.4s"`,
+  `style="fade-in: 0.4s 0.2s"` (with a delay), `style="slide-from: -20 0 0.3s"`
+  (dx dy duration \[delay\]), `style="pulse: 1.2s"`, `style="easing: out-back"`.
+  These play once when the control is created (the screen is shown) - built
+  for reveals and attention pulses, not general-purpose triggers.
+- **`<animate>`** - a full escape hatch onto every native `anim_type`
+  (`alpha`/`clip`/`color`/`flip_book`/`offset`/`size`/`uv`/`wait`/
+  `aseprite_flip_book`) and every trigger (`play_event`/`start_event`/
+  `end_event`/`reset_event`, not just on-create), for anything the CSS
+  sugar doesn't cover:
+  ```html
+  <image src="textures/ui/cw/glow">
+    <animate type="color" duration="0.3" easing="out_quad"
+             from="[1,1,1]" to="[0.5,0,0]" play_event="button.confirm"/>
+  </image>
+  ```
+  `from`/`to`/`initial_uv` take a JSON literal (a number or `[x,y,...]`).
+  `next="otherAnim"` chains into another `<animate>` on the same or a
+  different element (auto-namespaced unless already `@ns.name`). Multiple
+  `<animate>` children on one element all attach, in order; one inside an
+  `each=""`-repeated element gets its own independent animation per
+  instance, not one shared across all of them.
+
 ## Non-destructive patching (OR-Track D6)
 
 `lib/modifications.js`'s `applyModifications(baseJson, modList)` patches a

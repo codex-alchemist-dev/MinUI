@@ -8,7 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node runtime/expr.test.cjs && node lib/layout/grid.test.js && node lib/lintjsonui.test.js && node lib/modifications.test.js && node lib/test/entity-container.test.js && node src/test/d2-pilot-compare.js && node src/test/d2-container-pilot.js && node src/test/d2-obscure-syntax.js"
+    "test": "node runtime/expr.test.cjs && node lib/compile.test.js && node lib/layout/grid.test.js && node lib/lintjsonui.test.js && node lib/modifications.test.js && node lib/test/entity-container.test.js && node src/test/d2-pilot-compare.js && node src/test/d2-container-pilot.js && node src/test/d2-obscure-syntax.js"
   },
   "devDependencies": {
     "@minecraft/server": "^2.6.0",
