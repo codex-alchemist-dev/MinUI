@@ -29,7 +29,8 @@ verified constraint and what MinUI does about it.
 lib/
   markup.js      the .ui.html/.ui.css parser
   compile.js     the compiler: markup -> JSON UI + a runtime field table
-  lintjsonui.js  catches known "silent failure" JSON UI mistakes at build time
+  lintjsonui.js  catches known "silent failure" and crash-causing JSON UI
+                 mistakes at build time (OR-Track D5)
   entity-container.js  Inventory()/Equipment()/Button() container-screen
                  primitives + validateContainerContract() (OR-Track D5)
   layout/grid.js chunkRows() - the cols x rows grid-chunking math shared by
@@ -191,22 +192,32 @@ cols x rows chunking (`lib/layout/grid.js`'s `chunkRows()`) to lay out fixed
 `cellSize` slots at absolute offsets, since real interactive item slots
 need known positions rather than flowing layout.
 
-## Chest-contract validation (OR-Track D5)
+## Structural validation (OR-Track D5)
 
-`entity-container.js`'s `validateContainerContract(builder, {declaredInventorySize})`
-does declarative, pre-deploy structural checks over a finished
-`ContainerBuilder` - modeled on mcbejsonuimasterAI's own chest-contract
-research pattern, every issue explicitly `runtimeVerified: false` (a
-structural consistency check, never a claim about real in-game behavior).
+Two complementary checks, modeled on mcbejsonuimasterAI's chest-contract
+research pattern - every issue is a structural consistency check, never a
+claim about real in-game behavior (`lintjsonui.js`'s errors are hard
+failures since some are confirmed client crashes; `validateContainerContract()`'s
+are tagged `runtimeVerified: false`):
 
-`Inventory()`/`Equipment()`/`Button()` assign `this.sections[label] = ...`
-with no duplicate-label guard - a second call reusing an earlier label
-silently overwrites that entry, so a later `attachTo` referencing that
-label attaches to the wrong section with no error. `validateContainerContract()`
-catches this (an `allocatedLabels` array records every label a call ever
-used, duplicates included), plus a genuine button-index collision (a safety
-net - the sequential allocator shouldn't normally produce one) and a declared entity
-`inventory_size` too small for what the builder actually allocated.
+- **`lib/lintjsonui.js`** runs over every JSON file under a resource pack's
+  `ui/` folder (compiled output and hand-written overlays alike):
+  `>=` (not a real Molang operator), an empty string literal or a division
+  on `#inventory_stack_count` (both confirmed to crash the client, not just
+  misbehave), `collection_index` with no ancestor `collection_name` or
+  outside a real instantiation site (a root-level definition, which the
+  engine rejects), a `button` with no `collection_details` binding, a
+  `$variable` inside a `modifications` subtree, and a `collection_index`
+  collision - two cells declared under the same `collection_name` silently
+  fighting over one real slot.
+- **`entity-container.js`'s `validateContainerContract(builder, {declaredInventorySize})`**
+  checks things only visible before compilation: `Inventory()`/`Equipment()`/`Button()`
+  assign `this.sections[label] = ...` with no duplicate-label guard, so a
+  second call reusing an earlier label silently overwrites that entry and a
+  later `attachTo` referencing it attaches to the wrong section - caught via
+  an `allocatedLabels` array recording every label a call ever used,
+  duplicates included. Also checks a declared entity `inventory_size` too
+  small for what the builder actually allocated.
 
 ## TypeScript/JSX authoring
 
