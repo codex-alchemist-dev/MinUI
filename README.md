@@ -42,7 +42,12 @@ lib/
   portraits.js   auto-crops a character portrait from its geometry + skin
   test/          entity-container.js's own test suite
 runtime/
-  runtime.js     the form transport + expression evaluator + navigation stack
+  runtime.js     the form transport + navigation stack
+  expr.js        the pure `{path | filter}` expression evaluator (no
+                 Bedrock imports - real ES module, testable in plain Node);
+                 registerFilter() adds a project's own filters
+  package.json   {"type":"module"} - runtime/ is real ES modules regardless
+                 of this repo's own root package.json (CommonJS)
   hud.js         the persistent-HUD relay (title-channel data push)
   container.js   chest-style container screens (a satchel entity)
   controlItems.js reusable "locked hotbar loadout, routed to handlers" helper
