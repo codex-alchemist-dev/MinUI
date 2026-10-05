@@ -1,0 +1,7 @@
+{
+  "openrockVersion": 1,
+  "kind": "library",
+  "name": "@minui/core",
+  "version": "0.1.0",
+  "content": { "rpOverlayDir": "rp" }
+}
