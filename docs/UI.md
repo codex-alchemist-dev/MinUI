@@ -367,14 +367,15 @@ The satchel appears where the player looks, and their next right-click opens it.
 
 ## 8. RTS command mode
 
-`ui/rts.js` is pure mechanism - it has no items, no menu button, no idea how a player invokes anything. `enterRts(player)` / `exitRts(player)` do the camera and body-double swap; six standalone command functions do the rest: `rtsSelectSquad`, `rtsNextFormation`, `rtsMove`, `rtsAttack`, `rtsSurround`, `rtsSummonHere` (each throws a player-facing `Error` on a bad call - no squad selected, nothing under the cursor). While active:
+`ui/rts.js` is pure mechanism - it has no items, no menu button, no idea how a player invokes anything. `enterRts(player)` / `exitRts(player)` do the camera and body-double swap; standalone command functions do the rest: `rtsSelectUse` (the two-click box select), `rtsNextFormation`, `rtsMove`, `rtsAttack`, `rtsSurround`, `rtsSummonHere` (each throws a player-facing `Error` on a bad call - nothing selected, nothing under the cursor). While active:
 
-- **Body double:** holds a verified copy of the player's items, plus a serialized backup.
-- **Controls:** the player is invisible and protected; WASD pans a free camera, and jump/sneak raise or lower it.
-- **Cursor:** turning the head aims an in-world cursor; `rtsAttack`/`rtsSurround` act on whatever's under it, `rtsMove`/`rtsSummonHere` on the ground point.
+- **Body double:** holds a verified copy of the player's items, plus a serialized backup. The player's own body stays where it was; a chunk anchor entity follows the camera.
+- **Controls:** the player is invisible and protected; WASD pans a fixed top-down camera, and jump/sneak raise or lower it.
+- **Cursor:** the head still turns; pitch and yaw map onto a screen point (yaw wraps), cast through the camera as a ray. `rtsAttack`/`rtsSurround` act on whatever's under it, `rtsMove`/`rtsSummonHere` on the ground point. Optionally drawn as a HUD sprite (see "Fast HUDs").
+- **Selection:** use the Select item once to drop a box corner, again to add everyone inside; orders act only on the selection.
 - **Following:** characters on "follow" follow the body double.
 
-Exiting, relogging, dying or `/reload` all put the player back at their body with their items. `registerRtsExitHook(fn)` runs `fn(player)` on every one of those paths, not just a manual `exitRts()` - use it to clean up anything you gave the player for command mode. `getRtsInfo(player)` feeds a HUD.
+Exiting, relogging, dying, changing dimension or `/reload` all put the player back at their body with their items. `registerRtsExitHook(fn)` runs `fn(player)` on every one of those paths, not just a manual `exitRts()` - use it to clean up anything you gave the player for command mode. `getRtsInfo(player)` feeds a HUD. Build mode (free camera + schematics) shares the same session core: see `docs/BUILD.md` in OpenChara.
 
 **Which item (or menu button, or chat command) triggers which command is invocation control - a project's own choice, not the engine's.** `ui/controlItems.js` is a small reusable helper for the common case (a locked hotbar loadout mapped to handlers):
 
