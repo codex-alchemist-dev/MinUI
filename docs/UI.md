@@ -310,6 +310,23 @@ A HUD's provider runs every few ticks, and only changed values are sent. Return 
 
 HUDs can't have buttons. Keep the number of values small: at one value per tick, 40 changing values take 2 seconds to all update.
 
+### Fast HUDs: a moving cursor, a stretching rectangle
+
+Normal HUD values travel one per tick and refresh every 4 ticks - fine for text, far too slow for a cursor. A **fast HUD** (`<hud id="rts" data="rtsHud" fast>`) re-evaluates every tick and sends all of its numbers as ONE packed title (four zero-padded digits each, 0-9999), so a cursor, a rectangle and a counter move together. Two elements are only available there:
+
+```html
+<hud id="rts" data="rtsHud" fast>
+  <float x="{cx}" y="{cy}">                       <!-- children placed at (x, y) GUI pixels from the top-left -->
+    <image src="textures/ui/cw/rts_cursor" style="width: 16; height: 16"/>
+  </float>
+  <float x="{bx}" y="{by}">
+    <box w="{bw}" h="{bh}" style="background-color: #33ccff; background-opacity: 0.3"/>   <!-- width AND height bound -->
+  </float>
+</hud>
+```
+
+JSON UI cannot bind an offset, so `<float>` is built from two spacers whose sizes are bound, and the client slices the packed title with `%.Ns` cuts (`lib/compile/hudPositioning.js`, runtime side `runtime/hudPack.js`). Positions are in GUI pixels, so the provider has to know the player's screen size in GUI units (the engine's RTS HUD stores a per-player calibration). **Unproven on a real client until the in-game spike passes** - see OpenChara `/scriptevent <ns>:spike hud`.
+
 ---
 
 ## 6. Languages

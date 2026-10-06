@@ -15,9 +15,12 @@ import { world, system } from "@minecraft/server";
 import { HUDS, HUD_HEADER } from "./screens.generated.js";
 import { evaluate, renderTemplateForHud, withLoops } from "./runtime.js";
 import { getPlayerLanguage } from "./i18n.js";
+import { packNumbers } from "./hudPack.js";
 import { NS, TAG } from "../ids.js";
 
 const REFRESH_TICKS = 4;
+// Fast HUDs (<hud fast>, e.g. a moving cursor) re-evaluate every tick and send ONE packed numeric title, alternating
+// with the normal queue so slow values (text, textures) still get their turn.
 const providers = new Map();
 export function registerHudProvider(name, fn) { providers.set(name, fn); }
 
@@ -38,7 +41,7 @@ export function listHuds() { return Object.keys(HUDS); }
 const states = new Map();
 function state(player) {
     let s = states.get(player.id);
-    if (!s) { s = { sent: new Map(), queue: new Map() }; states.set(player.id, s); }
+    if (!s) { s = { sent: new Map(), queue: new Map(), fast: new Map() }; states.set(player.id, s); }
     return s;
 }
 
@@ -49,6 +52,7 @@ function valueOf(field, env) {
         case "tex": { const v = renderTemplateForHud(field.t, env); return typeof v === "string" ? v : ""; }
         case "bar": { const v = Math.max(0, Math.min(100, Number(evaluate(field.e, env)) || 0)); return String(Math.round((v / 100) * field.px)); }
         case "vis": return evaluate(field.e, env) ? "1" : "0";
+        case "num": return Number(evaluate(field.e, env)) || 0;
         default: return "";
     }
 }
@@ -66,6 +70,7 @@ function refreshPlayer(player) {
         const env = { ...data, player: { name: player.name }, __lang: getPlayerLanguage(player) };
         let reshown = false;
         hud.fields.forEach((f, i) => {
+            if (f.k === "num") return; // travels in the packed title (refreshFast)
             const key = `${HUD_HEADER}${id}.${i}|`;
             let value;
             if (f.root) value = enabled && data.visible !== false ? "1" : "0";
@@ -86,11 +91,31 @@ function refreshPlayer(player) {
     }
 }
 
+function refreshFast(player) {
+    const s = state(player);
+    for (const [id, hud] of Object.entries(HUDS)) {
+        if (!hud.fast || !isHudEnabled(player, id)) continue;
+        const provide = hud.provider ? providers.get(hud.provider) : null;
+        let data = {};
+        if (provide) { try { data = provide(player) ?? {}; } catch (e) { continue; } }
+        const env = { ...data, player: { name: player.name }, __lang: getPlayerLanguage(player) };
+        const values = [];
+        for (const f of hud.fields) if (f.k === "num") { try { values[f.slot] = valueOf(f, withLoops(env, f.loops)); } catch (e) { values[f.slot] = 0; } }
+        const key = `${HUD_HEADER}${id}.p|`;
+        const packed = packNumbers(values);
+        if (s.sent.get(key) === packed) s.fast.delete(key); else s.fast.set(key, packed);
+    }
+}
+
 function sendOne(player) {
     const s = states.get(player.id);
-    if (!s || s.queue.size === 0) return;
-    const [key, value] = s.queue.entries().next().value;
-    s.queue.delete(key);
+    if (!s) return;
+    // Fast packed value on even ticks (or whenever nothing else is waiting), the normal queue otherwise.
+    const useFast = s.fast.size > 0 && (system.currentTick % 2 === 0 || s.queue.size === 0);
+    const from = useFast ? s.fast : s.queue;
+    if (from.size === 0) return;
+    const [key, value] = from.entries().next().value;
+    from.delete(key);
     const title = typeof value === "string" ? key + value : { rawtext: [{ text: key }, ...(value.rawtext ?? [])] };
     try {
         player.onScreenDisplay.setTitle(title, { fadeInDuration: 0, stayDuration: 2, fadeOutDuration: 0 });
@@ -123,6 +148,7 @@ export function startHud() {
     system.runInterval(() => {
         for (const player of world.getAllPlayers()) {
             if (system.currentTick % REFRESH_TICKS === 0) refreshPlayer(player);
+            refreshFast(player);
             sendOne(player);
         }
     }, 1);
