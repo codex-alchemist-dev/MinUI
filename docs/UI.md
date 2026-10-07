@@ -396,11 +396,34 @@ Claude Waifus' `PATCHES/scripts/rtsControls.js` is the reference wiring: its own
 
 ---
 
-## 9. Linting
+## 9. Editing any screen: vanilla patches and slot buttons
+
+MinUI is where screens get edited, vanilla ones included. Two pieces:
+
+**Vanilla patches (`lib/vanillaPatch.js`).** Bedrock lets a pack patch an element of ANY screen with a native `modifications` property (Bedrock Wiki, "Intro to JSON UI"). `patchFile(namespace, { element: [insertBack("controls", [...])] })` builds the `ui/<file>.json` for it, with the documented operations (`insert_back/front/after/before`, `move_*`, `swap`, `replace`, `remove`) shape-checked. The HUD host `rp/ui/hud_screen.json` is exactly this shape, and `insert_back` is the operation proven in-game; the others follow the documented fields. (`lib/modifications.js` is the older build-time tree merger for when you hold the base JSON yourself.)
+
+**Slot buttons (`runtime/slotButtons.js` + `<slotbuttons>`).** A UI control cannot call a script, but a real slot can be watched - the trick our container and horse screens use. A *slot button* is a locked marker item in a player-inventory slot:
+
+```js
+setSlotButtons(player, { 9: { item: "ns:thing", name: "Move here", lore: ["..."], onPress(player, { sneaking, slot }) {} } });
+clearSlotButtons(player);
+```
+
+Click it and the script sees the slot change, puts the marker back, clears the cursor and runs `onPress` (a short poll plus the stable `playerInventoryItemChange` event). A swapped-in real item is kept, never overwritten; markers are inventory-locked (cannot be dropped or crafted with, but can be moved), kept on death and swept from anywhere they end up. Decision logic: `runtime/slotButtonsCore.cjs`, tested without a game.
+
+```html
+<slotbuttons screen="inventory" frame="textures/ui/highlight_slot" tint="#ffd24a"/>
+```
+
+frames those markers in the inventory screen: it patches vanilla's `common.inventory_panel` with one frame overlay per slot, each reading its own slot (`collection_name` + `collection_index`) and visible only while the item's name contains the invisible marker sentinel - so a normal inventory shows nothing. Attributes: `first` (collection index of the first cell, default 9), `count` (27), `cols` (9), `cell` (18), `frame`, `tint`, `layer`.
+
+Limits: classic (large-screen) inventory layout only - the pocket layout scrolls its grid, so there buttons work but are not framed. Confirm in-game that `first="9"` is right (set `first="0"` if frames land on the wrong cells).
+
+## 10. Linting
 
 `node tools/openchara.js check <projectDir>` (and every `build`/`deploy`/`dev`) runs a JSON UI linter over everything under `ui/` in the resource pack - the compiler's own output and any raw JSON UI a project overlays by hand. It catches the "parses fine, does nothing in-game" mistakes: `>=` in a binding (Molang has no such operator), an empty `''` literal, `collection_index` with no ancestor `collection_name`, a `button` with no `collection_details` binding, and a `$variable` inside a `modifications`-injected subtree. A build fails rather than shipping one of these silently.
 
-## 10. Testing
+## 11. Testing
 
 `tools/lib/mcstub.js` runs a built project's scripts in Node, with an in-memory stand-in for `@minecraft/server`. Its forms record what was put on them and can be answered by a script. Claude Waifus' `tests/ui-smoke.mjs` uses it to:
 
