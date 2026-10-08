@@ -37,6 +37,17 @@ export function setHudEnabled(player, id, enabled) {
 }
 export function listHuds() { return Object.keys(HUDS); }
 
+/** What the HUD pipeline is doing for this player right now (for in-game diagnostics): HUD ids, which are fast/enabled, queue sizes, the last titles sent. */
+export function hudDebug(player) {
+    const s = states.get(player.id);
+    return {
+        huds: Object.entries(HUDS).map(([id, h]) => `${id}${h.fast ? "(fast)" : ""}${isHudEnabled(player, id) ? "" : "(off)"}`),
+        providers: [...providers.keys()],
+        queued: s?.queue.size ?? 0, queuedFast: s?.fast.size ?? 0,
+        lastSent: s ? [...s.sent.entries()].slice(-4).map(([k, v]) => `${k}${typeof v === "string" ? v : "{..}"}`) : [],
+    };
+}
+
 // playerId -> { sent: Map<key, value>, queue: Map<key, value> }
 const states = new Map();
 function state(player) {
